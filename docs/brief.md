@@ -46,8 +46,11 @@ keeps him framed by moving and resizing a crop window over the full 4K frame and
   **IMX378**, not the IMX582 below. Booting needs the T-006 kick and a replug with the app searching
   (`docs/BUILD-mudmini.md`). T-002 must check the real sensor modes before relying on the list below.
 - **A second unit matches (2026-09-26, serial `…10C192A5D200`):** `f63b`, bootloader 0.0.0, IMX378, boots
-  first try with T-006, 30.1 fps · p50 49 ms. Chris has ~4 units; they look like one batch that
-  differs from upstream's. Design for the IMX378.
+  first try with T-006, 30.1 fps · p50 49 ms.
+- **A third unit is upstream's kind (2026-09-26, serial `1944…3010A1DA5F1300`):** `f63d`, bootloader
+  0.0.15, sensor LCM48 (the 48 MP IMX582 module); opens any time with no replug, first frame in
+  ~3 s, 30.0 fps · p50 46 ms. Survey: 2 × IMX378 / 0.0.0 (incl. the daily unit), 1 × LCM48 / 0.0.15;
+  a fourth unit wasn't found. Which kind follow mode targets is Chris's call (T-002 scope).
 
 - Pipeline today: `ColorCamera` (THE_4_K, `setIspScale(1,2)` for 1080p) → `video` (NV12) →
   `XLinkOut "video"`; `XLinkIn` carries `CameraControl`. `Sources/OpalBridge/OpalBridge.cpp`

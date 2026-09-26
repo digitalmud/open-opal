@@ -129,7 +129,10 @@ echo T-002 verification OK
   a replug with the app searching (`docs/BUILD-mudmini.md`). Baseline at 1080p ISP-downscale:
   30.1 fps, p50 51–52 ms (`opal_get_telemetry`).
 - 2026-09-26: a second C1 (serial `…10C192A5D200`) is identical (f63b, bootloader 0.0.0, IMX378;
-  30.1 fps · 49 ms on a Mac port). Candidate test camera, so Chris's daily unit stays free.
+  30.1 fps · 49 ms on a Mac port).
+- 2026-09-26: a third C1 (serial `1944…3010A1DA5F1300`) is upstream's kind: f63d, bootloader 0.0.15,
+  LCM48 (48 MP); no replug needed, first frame ~3 s, 30.0 fps · 46 ms. Scope must first settle which
+  sensor follow mode targets (Chris's call).
 
 - depthai docs: ImageManip / ImageManipConfig (`setCropRect`, `setResize`), ColorCamera `isp`
   output; jtannahill/opal-c1-depthai ran five ImageManip crops off a 4K stream on this same

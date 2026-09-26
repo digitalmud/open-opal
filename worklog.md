@@ -38,3 +38,7 @@
 - 10:07: surveyed a second C1 (serial …10C192A5D200). It's identical to the daily unit (f63b,
   bootloader 0.0.0, IMX378) and boots first try through T-006 at 30.1 fps · 49 ms. Chris's
   cameras look like one batch, different from upstream's. It's the candidate test camera for T-002.
+- 10:14: a third C1 (serial 1944…A1DA5F1300) is upstream's kind: f63d, bootloader 0.0.15, LCM48
+  48 MP sensor. It opens any time with no replug (first frame ~3 s, 30.0 fps · 46 ms) and went
+  through upstream's path without touching T-006's code, which confirms that promise on hardware.
+  A fourth camera wasn't found. Open question for T-002's scope: which sensor follow mode targets.
