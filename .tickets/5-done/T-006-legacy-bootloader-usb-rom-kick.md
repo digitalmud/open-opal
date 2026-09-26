@@ -366,7 +366,7 @@ the first code edit. Principles: `security.least-privilege` is honoured in inten
 named requests are sent) but not in effect, because of the P1 reset. The rest is fine.
 Files: `OpalBridge.cpp` in scope; the ticket file in scope.
 
-**Verdict: back-to-build** — two P1s (reset-on-close, wrong-device fallback) plus three P2s; the combined fix is well over the 10-line fix-in-place limit
+Round result: back-to-build — two P1s (reset-on-close, wrong-device fallback) plus three P2s; the combined fix is well over the 10-line fix-in-place limit
 
 ---
 
@@ -403,7 +403,7 @@ passed (Build log).
 Silencing scan: none. Principles: `security.least-privilege` intent held (only the two requests
 sent, greps enforce it); "behaviour matches upstream" (Charter) fails, see the P1.
 
-**Verdict: back-to-build** — the pre-emptive probe changes upstream behaviour whichever way its reset flag is set; restructure to kick only after depthai's own 0.0.0 refusal
+Round result: back-to-build — the pre-emptive probe changes upstream behaviour whichever way its reset flag is set; restructure to kick only after depthai's own 0.0.0 refusal
 
 ---
 
@@ -435,7 +435,7 @@ review 1). Hardware run 6 passed.
 Silencing scan: none. Principles: upstream cameras never reach the new code
 (`isLegacyBootloaderRefusal` gate): Charter satisfied. `security.least-privilege` held.
 
-**Verdict: back-to-build** — four P2s on failure paths that could strand the camera in USB ROM mode or hide the cause; together over the fix-in-place size limit
+Round result: back-to-build — four P2s on failure paths that could strand the camera in USB ROM mode or hide the cause; together over the fix-in-place size limit
 
 ---
 
