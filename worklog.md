@@ -92,3 +92,11 @@
   `t003-follow-wip`; T-014 (menu-bar presets, the design Chris wants if he continues) in backlog.
   The deciding test he may run: whether stock auto-exposure/white balance/focus drift bothers him
   on calls.
+- 15:12: pivot explored and it works: **Center Stage-style follow on the stock webcam**. Camera 3's
+  stock firmware offers 2560×1440 and 4K as a plain webcam (and advertises standard UVC controls;
+  a read-only GET_CUR succeeded). A single-file prototype (`Prototypes/StockFollow/`) follows Chris
+  at 8 % CPU / 42 MB. Settings tuned live and locked by Chris: 1.33× at his normal seat, ramping to
+  1.0× as he leans in, 12 % dead zone, gentle glide, centre on (re)acquire, 1.5 s hold then back to
+  wide. Reframe (open source) was checked: its build is only Apple Development-signed, so Gatekeeper
+  rejects it. The OBS face-tracker was ruled out by Chris ("I don't want to use OBS"). A virtual
+  camera still needs T-005's signing.
