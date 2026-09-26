@@ -50,7 +50,7 @@ PR (welcome later, not a deliverable).
 ### `~/Developer/open-opal/.tickets/`
 
 - T-001 — Build and run upstream Open Opal on mudmini — doing (sprint 1; waits on T-006)
-- T-006 — Boot a C1 whose bootloader reports 0.0.0 (send the bare USB-ROM-boot command) — todo (sprint 1; found in T-001)
+- T-006 — Boot a C1 whose bootloader reports 0.0.0 (send the bare USB-ROM-boot command) — doing (sprint 1; found in T-001)
 - T-002 — Spike: on-camera 4K→1080p crop pipeline with a movable window — backlog (sprint 1; depends T-001)
 - T-003 — Follow mode: Vision face servo drives the crop window — backlog (sprint 2; depends T-002)
 - T-004 — Follow controls: toggle, framing presets, speed; persist settings — backlog (sprint 3; depends T-003)

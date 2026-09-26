@@ -2,7 +2,7 @@
 id: T-006
 type: ticket
 title: Boot a C1 whose bootloader reports 0.0.0 (send the bare USB-ROM-boot command)
-status: todo
+status: doing
 priority: high
 tags: [bridge, discovery, bootloader, blocker]
 created: 2026-09-26
