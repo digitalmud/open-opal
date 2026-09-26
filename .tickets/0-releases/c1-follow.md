@@ -59,7 +59,7 @@ PR (welcome later, not a deliverable).
 - T-003 — Follow plumbing: 1440p camera window + Mac zoom, view-rect API, focus mapping, hand-steered — blocked: paused by Chris 2026-09-26, code on branch t003-follow-wip (sprint 2; depends T-002)
 - T-010 — Follow servo: Vision faces steer the view rect, Center Stage feel — backlog (sprint 2; depends T-003; split from T-003)
 - T-004 — Follow controls: toggle, framing presets, speed; persist settings — backlog (sprint 3; depends T-010)
-- T-005 — Signed Release build, virtual camera install, /Applications — backlog (sprint 3; depends T-001)
+- T-005 — Virtual camera working: adopt upstream PR #1, our identity, Developer ID sign + notarize, /Applications — todo (sprint 3; depends T-001)
 
 ## Linked specs
 
