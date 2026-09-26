@@ -1,7 +1,7 @@
 # open-opal — follow mode for the Opal C1
 
 **Area:** Personal / System
-**Status:** 2026-09-26: upstream builds and streams on mudmini (T-001: 30.1 fps, p50 51 ms at 1080p). Chris's C1 needed a bridge fix to boot at all (T-006: its bootloader reports 0.0.0). Release `c1-follow`: T-001, T-006, T-002 done (crop design D picked); next T-003 (follow servo); T-007–T-009 backlog.
+**Status:** 2026-09-26: upstream builds and streams on mudmini; camera 3 (LCM48) is Chris's daily camera. Done: T-001, T-006, T-002, T-011 (a dropped link no longer kills the app). Follow mode (T-003, design E1) paused on branch `t003-follow-wip`. T-005 (virtual camera via Developer ID, upstream PR #1 adopted) built on branch `t005-virtual-camera`, waiting on Chris's Apple membership.
 
 ## Overview
 

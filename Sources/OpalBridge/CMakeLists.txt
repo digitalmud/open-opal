@@ -14,7 +14,7 @@ find_package(depthai CONFIG REQUIRED
 
 # Built as a dylib so the Xcode app target can link it without also having to
 # understand depthai's transitive Hunter dependencies.
-add_library(OpalBridge SHARED OpalBridge.cpp LegacyBootloader.cpp CropPipeline.cpp)
+add_library(OpalBridge SHARED OpalBridge.cpp LegacyBootloader.cpp CropPipeline.cpp SafeClose.cpp)
 
 target_include_directories(OpalBridge PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>)

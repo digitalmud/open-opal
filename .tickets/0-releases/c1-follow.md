@@ -54,7 +54,9 @@ PR (welcome later, not a deliverable).
 - T-007 — Harden the legacy-bootloader path (T-006 deferred review findings) — backlog (sprint 2; depends T-006)
 - T-008 — Easier way into the C1's bootloader window (no manual "Try again, then replug") — backlog (sprint 3; depends T-006)
 - T-009 — Upstream bridge CMakeLists names a missing test/region_test.c — backlog (sprint 2)
-- T-011 — App hangs forever when the camera link drops (watchdog → opal_close deadlock) — doing (sprint 3; found in T-003)
+- T-011 — App hangs forever when the camera link drops (watchdog → opal_close deadlock) — done 2026-09-26 (sprint 3; found in T-003)
+- T-012 — First open of an f63d C1 fails once with '__bootloader' and succeeds on retry (+~5 s) — backlog (sprint 3; found in T-011)
+- T-013 — Xcode can bundle a stale libOpalBridge.dylib after a bridge change — backlog (sprint 3; found in T-011)
 - T-002 — Crop bench: measure four on-camera crop pipelines against the follow-mode budget — done 2026-09-26 (sprint 1; design D picked)
 - T-003 — Follow plumbing: 1440p camera window + Mac zoom, view-rect API, focus mapping, hand-steered — blocked: paused by Chris 2026-09-26, code on branch t003-follow-wip (sprint 2; depends T-002)
 - T-010 — Follow servo: Vision faces steer the view rect, Center Stage feel — backlog (sprint 2; depends T-003; split from T-003)
@@ -72,3 +74,4 @@ PR (welcome later, not a deliverable).
 - 2026-09-26 — T-002 done: ISP 1440p window + host zoom (design D) passes at 30 fps / 58 ms; ImageManip fails when moving. Chris picked D; T-003 re-scopes around it.
 - 2026-09-26 — T-003 split (Chris): T-003 = follow plumbing (design D in the app, hand-steered), T-010 = the face servo. T-004 now depends on T-010.
 - 2026-09-26 — T-003 paused by Chris (follow design switched to E1: whole frame 2560×1440, Mac crop 1.0–1.33×; code on branch t003-follow-wip). Focus moves to T-005 (virtual camera). T-011 filed.
+- 2026-09-26 — T-011 done: a dropped camera link no longer hangs or aborts the app (safe close, no crash-dump hunt, timed control sends). T-012, T-013 filed.
