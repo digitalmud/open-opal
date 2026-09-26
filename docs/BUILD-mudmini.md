@@ -37,3 +37,4 @@ catches the bootloader window and sends it the one USB-ROM-boot command (T-006).
 ## Numbers (1080p default mode, Release bridge, through Chris's USB 3.1 hub)
 - 30.1 fps, p50 latency 52.2 ms over 60 s (`opal_get_telemetry`, 09:39; app toolbar: 30 fps · 54 ms)
 - Stock "Opal C1" webcam back 7 s after quitting the app
+- Unplugging the camera mid-stream no longer kills the app: it reconnects when the camera is back (T-011).

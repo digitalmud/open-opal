@@ -2,6 +2,7 @@
 
 #include "CropPipeline.hpp"
 #include "LegacyBootloader.hpp"
+#include "SafeClose.hpp"
 
 #include <depthai/depthai.hpp>
 
@@ -21,8 +22,18 @@ std::string g_lastError;
 /// pop a "wants to find devices on your local network" prompt the first time the
 /// app runs. The C1 is USB-only, so restrict discovery and skip the prompt.
 struct UsbOnlyInit {
-    UsbOnlyInit() { setenv("DEPTHAI_PROTOCOL", "usb", /*overwrite=*/0); }
+    UsbOnlyInit() {
+        setenv("DEPTHAI_PROTOCOL", "usb", /*overwrite=*/0);
+        // T-011: no crash-dump hunt on close. After a dropped link depthai would
+        // otherwise poll ~9 s for the rebooting camera and CONNECT to it to fetch
+        // a dump, fighting our reconnect for the device. We never use the dumps.
+        setenv("DEPTHAI_CRASHDUMP_TIMEOUT", "0", /*overwrite=*/0);
+    }
 };
+
+// T-011: sends to the camera's control queue give up after this long instead of
+// blocking forever when the link is dead (the queue is blocking, depth 16).
+constexpr auto kSendTimeout = std::chrono::milliseconds(100);
 const UsbOnlyInit g_usbOnly;
 
 // --- boot log ---------------------------------------------------------------
@@ -385,17 +396,22 @@ OpalDeviceHandle* opal_open(const char* mxid, OpalPipelineConfig cfg,
 
                 if(haveWant) {
                     dai::CameraControl ctrl;
+                    bool sent = true;
                     if(buildDelta(want, prev, havePrev, ctrl)) {
                         try {
-                            h->controlQ->send(ctrl);
+                            // Timed (T-011): a dead link must not wedge this thread,
+                            // or opal_close's join would hang. Unsent -> retried next tick.
+                            sent = h->controlQ->send(ctrl, kSendTimeout);
                         } catch(const std::exception& e) {
                             setError(e.what());
                             break;
                         }
                     }
-                    std::lock_guard<std::mutex> lk(h->ctrlMutex);
-                    h->lastSent = want;
-                    h->lastSentValid = true;
+                    if(sent) {
+                        std::lock_guard<std::mutex> lk(h->ctrlMutex);
+                        h->lastSent = want;
+                        h->lastSentValid = true;
+                    }
                 }
                 std::this_thread::sleep_for(std::chrono::milliseconds(33));
             }
@@ -489,7 +505,10 @@ void opal_close(OpalDeviceHandle* h) {
     h->controlQ.reset();
     h->cropQ.reset();
     h->videoQ.reset();
-    h->device.reset();   // device reboots -> returns to stock UVC in ~5s
+    // Device reboots -> returns to stock UVC in ~5s. Closed via closeDeviceSafely
+    // so a dropped camera link can't hang or abort the app (T-011): a normal close
+    // takes ~1.4 s; after 8 s, or on a throw, the device object is abandoned.
+    opal::closeDeviceSafely(std::move(h->device), std::chrono::seconds(8), bootLog);
     delete h;
 }
 
@@ -583,7 +602,7 @@ void opal_trigger_autofocus(OpalDeviceHandle* h) {
     try {
         dai::CameraControl ctrl;
         ctrl.setAutoFocusTrigger();
-        h->controlQ->send(ctrl);
+        h->controlQ->send(ctrl, kSendTimeout);   // timed: never block on a dead link (T-011)
     } catch(const std::exception& e) { setError(e.what()); }
 }
 
@@ -619,7 +638,8 @@ void opal_set_focus_region(OpalDeviceHandle* h, float x, float y, float w, float
         // decides to hunt. Without an explicit trigger, a click often produced no
         // visible refocus at all. Ask for the scan.
         ctrl.setAutoFocusTrigger();
-        h->controlQ->send(ctrl);
+        // Timed (T-011); if it didn't go out, don't pretend the lock was taken.
+        if(!h->controlQ->send(ctrl, kSendTimeout)) return;
 
         // Keep the coalescing thread in step, or its next delta would "helpfully"
         // re-send CONTINUOUS and undo the lock we just took.
@@ -641,7 +661,7 @@ void opal_set_exposure_region(OpalDeviceHandle* h, float x, float y, float w, fl
 
         dai::CameraControl ctrl;
         ctrl.setAutoExposureRegion(rx, ry, rw, rh);
-        h->controlQ->send(ctrl);
+        h->controlQ->send(ctrl, kSendTimeout);   // timed: never block on a dead link (T-011)
     } catch(const std::exception& e) { setError(e.what()); }
 }
 

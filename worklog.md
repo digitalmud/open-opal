@@ -65,3 +65,24 @@
   the failure on camera 3.
 - Camera 3 is Chris's daily webcam now. It shows in macOS as "Opal C1" (not "(ctrl)") and needs
   no replug; every open was 2–3 s.
+
+---
+
+## 2026-09-26 (afternoon) — follow paused, virtual camera started, T-011 landed
+
+- Chris watched design D in the app ("very jittery, and way too close … It should frame me like a
+  normal video call"). The jitter was my hand-steering test; "too close" was real. Two
+  whole-frame designs were measured on camera 3 (E1 2560×1440: 30 fps / 58 ms, zoom 1.0–1.33×;
+  E2 2880×1620: 30 fps / 64 ms, 1.0–1.5×) and Chris picked E1. Then he paused follow to get the
+  virtual camera working. The follow code waits on branch `t003-follow-wip`.
+- T-005: a free Apple ID can't sign a camera extension (personal teams don't get the System
+  Extension capability), so Chris is enrolling in the Developer Program. Upstream PR #1 was
+  adopted (it fixes the feeder picking the capture stream instead of the sink, which would have
+  left the virtual camera blank) and the identity moved to `ca.digitalmud.*` with the team ID kept
+  out of git. Waiting on Apple's order processing; the work is on branch `t005-virtual-camera`.
+- T-011 landed: unplugging the camera used to abort the app (an exception out of depthai's Device
+  destructor) or, once, hang it (a close RPC deadlocked on the dead link). Now the close runs safely
+  with an 8 s bound, depthai's crash-dump hunt is off (it reconnected to the camera behind our
+  back), and control sends are timed. Four unplug tests on camera 3 recovered with no crash or hang.
+- Found along the way: camera 3's first open always fails once and retries (+~5 s, T-012), and
+  Xcode can bundle a stale bridge after bridge edits (build twice; T-013).
