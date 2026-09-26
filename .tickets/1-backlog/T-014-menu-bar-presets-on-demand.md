@@ -31,7 +31,9 @@ doesn't expose them in plain-webcam mode. So the preset has to live in the app.
 | Decision | Choice |
 |---|---|
 | Shape | Menu-bar item only: no Dock icon, no preview window, launch at login |
-| Presets | Named presets (e.g. "Day", "Evening"); one active; applied on every camera takeover. Hold: exposure (manual shutter/ISO, or the camera's own auto), white balance, **focus lock**, flicker, colour/detail |
+| Presets | Named presets; one active; applied on every camera takeover. Hold: exposure, white balance, **focus lock**, flicker, colour/detail |
+| **Exposure model** (Chris, 14:36) | **Shutter locked to a flicker-safe 1/60 or 1/30 s, stored per preset; ISO (100–1600) is the only brightness control.** Built-in trio **Bright / Mid / Dark**. Starting ISOs to tune by eye: 1/60 s → 200 / 400 / 800; 1/30 s → 100 / 200 / 400 (e.g. Dark at 1/30 for less noise) |
+| 1/30 s precision | Test for faint banding: upstream's bridge caps exposure at 33,000 µs (`std::clamp(c.exposureUs, 1, 33000)`), not 33,333 µs (true 1/30 = 4 × 120 Hz light pulses). If it bands, raise the cap to 33,333 µs if the sensor allows it at 30 fps. 1/60 s (16,667 µs) is exact |
 | Blur | **None.** "I don't care about the fake blur": no blur UI, and the segmentation and depth models never load |
 | Face metering | **None.** "Expose for my face … too janky". The camera's own auto-exposure stays available (runs on the camera, free); optionally a fixed exposure region, which needs no model |
 | Unplugged camera | The menu-bar icon changes (colour or slash) and the menu says so; reconnect is automatic (T-011) |
@@ -57,8 +59,8 @@ and measured before and after (CLAUDE.md "Measure, don't assert").
 
 Manual exposure 1/48 s, ISO 400 · manual focus 140 · manual WB 5500 K · saturation −2 · contrast 0 ·
 brightness 0 · flicker 60 Hz · sharpness 1 · luma/chroma denoise 1 · 1080p30 · rotate 180°.
-Note: 1/48 s isn't a whole number of 60 Hz light pulses (120/s). Suggest **1/60 or 1/30** to avoid
-banding under mains lighting (anti-banding only protects auto-exposure).
+Note: 1/48 s isn't a whole number of 60 Hz light pulses (120/s), so the presets use 1/60 or 1/30
+(see Exposure model); anti-banding only protects auto-exposure.
 
 ## Open for scope
 
