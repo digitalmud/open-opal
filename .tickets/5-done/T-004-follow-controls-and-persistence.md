@@ -2,11 +2,12 @@
 id: T-004
 type: ticket
 title: Follow controls — toggle, framing presets, speed; persist settings
-status: backlog
+status: cancelled
 priority: medium
 tags: [ui, settings, swiftui]
 created: 2026-09-26
 updated: 2026-09-26
+closed: 2026-09-26
 depends_on: [T-010]
 release: c1-follow
 sprint: 3
@@ -95,6 +96,7 @@ echo T-004 verification OK
 - Upstream's `coldDirty` + "apply" flow in `Inspector.swift` is the pattern to reuse for the
   follow toggle. Bundle id is set in `project.yml` (`bundleIdPrefix`); if T-005 changes it,
   the defaults domain follows.
+- 2026-09-26 cancelled (re-plan, Chris approved): superseded by T-014 (menu-bar app with the follow settings; persistence via upstream PR #1).
 
 ---
 

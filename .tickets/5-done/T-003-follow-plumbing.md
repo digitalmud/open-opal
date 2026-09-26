@@ -2,11 +2,12 @@
 id: T-003
 type: ticket
 title: Follow plumbing — 1440p camera window + Mac zoom, view-rect API, focus mapping, hand-steered
-status: blocked
+status: cancelled
 priority: high
 tags: [follow, swift, videotoolbox, bridge]
 created: 2026-09-26
 updated: 2026-09-26
+closed: 2026-09-26
 kind: feature
 depends_on: [T-002]
 release: c1-follow
@@ -165,6 +166,7 @@ Chris's no-jump verdict, telemetry, and tap-to-focus while zoomed.
 - Tap-to-focus arrives as an output-normalised point (`ContentView` → `camera.focus(at:)`); subject
   metering uses `SubjectInfo.bounds`, also output-normalised.
 - Camera 3 appears in macOS as "Opal C1" (USB `f63d`) and opens with no replug.
+- 2026-09-26 cancelled (re-plan, Chris approved): superseded by follow on the stock webcam (T-010, `Prototypes/StockFollow/`). The E1 code stays on branch `t003-follow-wip`; T-010 reuses `FollowView` and `HostZoom` from it.
 
 ---
 

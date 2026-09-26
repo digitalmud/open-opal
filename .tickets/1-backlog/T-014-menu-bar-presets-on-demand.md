@@ -1,19 +1,28 @@
 ---
 id: T-014
 type: ticket
-title: Menu-bar app with presets — camera on demand for calls, no preview, no blur, status icon
+title: Menu-bar app — follow settings, camera on demand for calls, no preview, status icon
 status: backlog
 priority: high
 tags: [ux, menu-bar, presets, virtual-camera, reliability]
 created: 2026-09-26
 updated: 2026-09-26
 kind: feature
-depends_on: [T-005, T-011]
+depends_on: [T-005, T-010]
 release: c1-follow
-sprint: 3
+sprint: 6
 ---
 
 ## Description
+
+**2026-09-26 re-plan (Chris approved):** the app now runs on the **stock webcam** (T-010), so
+there are **no manual camera presets** (the exposure model below applied to the depthai path and is
+parked with it). The settings are the follow controls instead: follow on/off; framing
+(max zoom, default 1.33×); zoom out when I lean in (on + sensitivity); calm ↔ responsive (dead zone
++ glide); when I leave (hold, then back to wide), defaults = Chris's locked prototype values, raw
+constants under Advanced. Still: menu bar only, launch at login, camera on demand, status icon for
+an unplugged camera, no preview, no blur, no face metering. Measured prototype baseline: 8 % CPU,
+42 MB. Sections below that describe presets/manual exposure are superseded.
 
 Stub from a design conversation with Chris, 2026-09-26 14:04–14:33; `/scope` fleshes it out
 after T-005 (the signed virtual camera) lands. Chris wants Open Opal to be **rock solid and

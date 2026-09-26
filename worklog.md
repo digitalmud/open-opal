@@ -100,3 +100,8 @@
   wide. Reframe (open source) was checked: its build is only Apple Development-signed, so Gatekeeper
   rejects it. The OBS face-tracker was ruled out by Chris ("I don't want to use OBS"). A virtual
   camera still needs T-005's signing.
+- 15:20: **re-plan applied** (Chris approved): c1-follow now ships follow on the stock webcam
+  (T-005 signing → T-010 follow → T-014 menu bar; T-015 latency check). T-003/T-004 cancelled as
+  superseded; depthai-path fixes (T-007/8/9/12/13) deferred. Next action: when Chris's Apple
+  membership is active, do his six Apple steps (`docs/INSTALL.md` on branch `t005-virtual-camera`),
+  then merge master (T-011) into that branch and run `scripts/release.sh`.

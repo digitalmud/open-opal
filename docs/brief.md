@@ -1,7 +1,7 @@
 # open-opal — follow mode for the Opal C1
 
 **Area:** Personal / System
-**Status:** 2026-09-26: upstream builds and streams on mudmini; camera 3 (LCM48) is Chris's daily camera. Done: T-001, T-006, T-002, T-011 (a dropped link no longer kills the app). Follow mode (T-003, design E1) paused on branch `t003-follow-wip`. T-005 (virtual camera via Developer ID, upstream PR #1 adopted) built on branch `t005-virtual-camera`, waiting on Chris's Apple membership.
+**Status:** 2026-09-26 re-plan (Chris approved): follow now runs on the **stock webcam feed** (prototype `Prototypes/StockFollow/`, settings locked by Chris, 8 % CPU / 42 MB) → a signed "Open Opal Camera" (T-005, waiting on Chris's Apple membership) → a menu-bar app (T-014). The depthai takeover path (T-001/T-006/T-002/T-011 done) is parked as the advanced path. Release `c1-follow`, sprints 4–6.
 
 ## Overview
 
@@ -28,9 +28,12 @@ keeps him framed by moving and resizing a crop window over the full 4K frame and
   measurements). The host runs a closed-loop servo: detect on the received 1080p frame,
   compute where the face sits relative to the current crop, nudge the crop. Closed loop makes
   it robust to the one-to-two frame lag between a crop command and the frame it produced.
-- **Over plain UVC the C1 exposes exactly one format on this Mac: 1920×1080 at 60 fps** (probed
-  2026-09-26 via AVFoundation). No 4K reaches the host without the DepthAI takeover. That is
-  why host-only trackers (Reframe, OBS face tracker) can't give the result Chris wants.
+- **Plain-webcam (UVC) formats depend on the unit.** The old daily camera (IMX378, f63b) exposed
+  only 1920×1080@60 over UVC (probed 2026-09-26, morning). **Camera 3** (LCM48, f63d), Chris's
+  daily camera since the afternoon, exposes 1280×720, 1920×1080, **2560×1440 and 3840×2160 at 30 fps**
+  (uncompressed `420v`) with its stock firmware, and advertises standard UVC controls (a read-only
+  GET_CUR from an ordinary app succeeded). So a host-side follow crop from 1440p/4K *is* possible
+  without the DepthAI takeover. That's the basis of the 2026-09-26 re-plan.
 - **Virtual camera needs a signed and notarized build** (CMIO system extension; ad-hoc signing
   is refused by AMFI). Without a Developer ID the app runs and previews but Zoom/Meet can't see
   it. Decision needed from Chris at T-005: use a digitalmud Apple Developer team, or fall back
@@ -95,6 +98,12 @@ keeps him framed by moving and resizing a crop window over the full 4K frame and
 | `~/Code/knowledge/verification-runs-in-stage-environment.md` | how verification blocks must be written |
 
 ## Decisions
+
+- **2026-09-26 (afternoon) — Follow on the stock webcam, not the depthai path (re-plan).** Chris
+  wants a normal-call look, stock auto image, no blur, no OBS. The stock feed of camera 3 is 1440p/4K;
+  a prototype followed him at 8 % CPU / 42 MB. Locked settings: 1.33× at his normal seat → 1.0× as he
+  leans in, 12 % dead zone, gentle glide, centre on (re)acquire, 1.5 s hold then wide. The depthai
+  design picks (D, then E1) are superseded; the depthai code stays as the advanced path.
 
 - **2026-09-26: Follow mode targets camera 3 (LCM48 / IMX582, f63d, bootloader 0.0.15).** Chris's
   choice after the three-unit survey. It becomes his daily webcam: no replug routine, ~3 s boot,

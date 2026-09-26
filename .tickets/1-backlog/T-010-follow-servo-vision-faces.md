@@ -1,19 +1,29 @@
 ---
 id: T-010
 type: ticket
-title: Follow servo — Vision faces steer the view rect, Center Stage feel
+title: Follow on the stock webcam — Vision faces steer a smooth 1440p crop into the virtual camera
 status: backlog
 priority: high
 tags: [follow, vision, servo, swift]
 created: 2026-09-26
 updated: 2026-09-26
 kind: feature
-depends_on: [T-003]
+depends_on: [T-005]
 release: c1-follow
-sprint: 2
+sprint: 5
 ---
 
 ## Description
+
+**2026-09-26 re-plan (Chris approved):** retargeted from the depthai path to the **stock webcam
+feed**. The reference is `Prototypes/StockFollow/` (tuned live and locked by Chris; 8 % CPU,
+42 MB): stock UVC 2560×1440 → `VNDetectFaceRectanglesRequest` ~10 Hz → spring-smoothed crop
+(1.33× at his normal seat, ramping to 1.0× as he leans in, 12 % dead zone, gentle over-damped
+glide, centre on (re)acquire, 1.5 s hold then back to wide) → 1920×1080 frames into the signed
+"Open Opal Camera" (T-005). Reusable parts from branch `t003-follow-wip` (T-003, cancelled):
+`FollowView` geometry and `HostZoom` (VTPixelTransferSession crop). Settings become user-facing in
+T-014. Where the app lives (a new target or a mode of the fork) is a `/scope` decision. The text
+below predates the re-plan and is superseded where it conflicts.
 
 Stub, split from T-003 on 2026-09-26 (Chris approved); `/scope` re-checks it against T-003's
 landed code. T-003 delivers a view rect the app can steer (1.5–2.0×, camera window + Mac zoom,

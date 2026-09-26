@@ -10,7 +10,7 @@ updated: 2026-09-26
 kind: bug
 depends_on: []
 release: c1-follow
-sprint: 3
+sprint: deferred
 ---
 
 ## Description
