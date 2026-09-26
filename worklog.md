@@ -35,3 +35,6 @@
   T-008 is the easier way in. T-007 holds the hardening items, T-009 an upstream CMake bug.
 - Next: T-002 (the crop spike). It must first check the IMX378's real modes; the brief's
   IMX582 figures may not hold for this unit.
+- 10:07: surveyed a second C1 (serial …10C192A5D200). It's identical to the daily unit (f63b,
+  bootloader 0.0.0, IMX378) and boots first try through T-006 at 30.1 fps · 49 ms. Chris's
+  cameras look like one batch, different from upstream's. It's the candidate test camera for T-002.

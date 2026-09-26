@@ -45,6 +45,9 @@ keeps him framed by moving and resizing a crop window over the full 4K frame and
   bootloader for only ~5 s after power-on; plain-UVC modes: 1080p60 only; depthai names the sensor
   **IMX378**, not the IMX582 below. Booting needs the T-006 kick and a replug with the app searching
   (`docs/BUILD-mudmini.md`). T-002 must check the real sensor modes before relying on the list below.
+- **A second unit matches (2026-09-26, serial `…10C192A5D200`):** `f63b`, bootloader 0.0.0, IMX378, boots
+  first try with T-006, 30.1 fps · p50 49 ms. Chris has ~4 units; they look like one batch that
+  differs from upstream's. Design for the IMX378.
 
 - Pipeline today: `ColorCamera` (THE_4_K, `setIspScale(1,2)` for 1080p) → `video` (NV12) →
   `XLinkOut "video"`; `XLinkIn` carries `CameraControl`. `Sources/OpalBridge/OpalBridge.cpp`
