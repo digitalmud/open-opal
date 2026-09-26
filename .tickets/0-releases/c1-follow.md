@@ -54,7 +54,7 @@ PR (welcome later, not a deliverable).
 - T-007 — Harden the legacy-bootloader path (T-006 deferred review findings) — backlog (sprint 2; depends T-006)
 - T-008 — Easier way into the C1's bootloader window (no manual "Try again, then replug") — backlog (sprint 3; depends T-006)
 - T-009 — Upstream bridge CMakeLists names a missing test/region_test.c — backlog (sprint 2)
-- T-002 — Spike: on-camera 4K→1080p crop pipeline with a movable window — backlog (sprint 1; depends T-001)
+- T-002 — Crop bench: measure four on-camera crop pipelines against the follow-mode budget — todo (sprint 1; depends T-001)
 - T-003 — Follow mode: Vision face servo drives the crop window — backlog (sprint 2; depends T-002)
 - T-004 — Follow controls: toggle, framing presets, speed; persist settings — backlog (sprint 3; depends T-003)
 - T-005 — Signed Release build, virtual camera install, /Applications — backlog (sprint 3; depends T-001)

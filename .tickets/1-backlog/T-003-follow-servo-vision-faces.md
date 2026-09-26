@@ -14,6 +14,12 @@ sprint: 2
 
 ## Description
 
+**2026-09-26 re-scope note (from T-002):** T-002 became a measurement bench, and Chris picks the
+crop design from its numbers. This ticket therefore also absorbs what the old T-002 draft carried
+for the app: the follow cold setting, the Swift `setCrop`/`currentCrop` plumbing, and mapping
+focus/exposure regions through the live crop rect. All of it for the **chosen** design. Re-scope
+after T-002 closes.
+
 With T-002's movable window in place, this ticket makes it follow Chris: detect the face on
 each received 1080p frame with Apple Vision, and steer the crop so the face sits where a good
 framing puts it, at a zoom that gives head-and-shoulders. This is the feature. It must feel
