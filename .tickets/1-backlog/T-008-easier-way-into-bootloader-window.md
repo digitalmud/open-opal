@@ -3,7 +3,7 @@ id: T-008
 type: ticket
 title: Easier way into the C1's bootloader window (no manual "Try again, then replug")
 status: backlog
-priority: medium
+priority: low
 tags: [ux, bridge, discovery]
 created: 2026-09-26
 updated: 2026-09-26
@@ -14,6 +14,9 @@ sprint: 3
 ---
 
 ## Description
+
+2026-09-26: priority lowered. Chris's daily camera is now the f63d / LCM48 unit, which opens with
+no replug; this ticket only matters for the two spare IMX378 units.
 
 Stub from T-001/T-006 (2026-09-26); `/scope` fleshes it out. Chris's C1 is bootable only
 during a ~5 s bootloader window after power-on, so today the routine is "launch the app or

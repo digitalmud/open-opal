@@ -42,3 +42,5 @@
   48 MP sensor. It opens any time with no replug (first frame ~3 s, 30.0 fps · 46 ms) and went
   through upstream's path without touching T-006's code, which confirms that promise on hardware.
   A fourth camera wasn't found. Open question for T-002's scope: which sensor follow mode targets.
+- 10:16: Chris chose camera 3 (LCM48) as the follow-mode target and his daily webcam. T-002 is
+  measured on it; T-008 drops to low priority (only the spare IMX378 units need a replug now).

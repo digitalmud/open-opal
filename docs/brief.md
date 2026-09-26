@@ -50,7 +50,7 @@ keeps him framed by moving and resizing a crop window over the full 4K frame and
 - **A third unit is upstream's kind (2026-09-26, serial `1944…3010A1DA5F1300`):** `f63d`, bootloader
   0.0.15, sensor LCM48 (the 48 MP IMX582 module); opens any time with no replug, first frame in
   ~3 s, 30.0 fps · p50 46 ms. Survey: 2 × IMX378 / 0.0.0 (incl. the daily unit), 1 × LCM48 / 0.0.15;
-  a fourth unit wasn't found. Which kind follow mode targets is Chris's call (T-002 scope).
+  a fourth unit wasn't found. Chris chose it as the follow-mode target and daily webcam (Decisions).
 
 - Pipeline today: `ColorCamera` (THE_4_K, `setIspScale(1,2)` for 1080p) → `video` (NV12) →
   `XLinkOut "video"`; `XLinkIn` carries `CameraControl`. `Sources/OpalBridge/OpalBridge.cpp`
@@ -93,6 +93,11 @@ keeps him framed by moving and resizing a crop window over the full 4K frame and
 | `~/Code/knowledge/verification-runs-in-stage-environment.md` | how verification blocks must be written |
 
 ## Decisions
+
+- **2026-09-26: Follow mode targets camera 3 (LCM48 / IMX582, f63d, bootloader 0.0.15).** Chris's
+  choice after the three-unit survey. It becomes his daily webcam: no replug routine, ~3 s boot,
+  48 MP sensor with upstream's documented modes. The two IMX378 units stay usable through T-006
+  as spares; T-008 drops to low priority.
 
 - **2026-09-26: Send this C1's bootloader the bare USB-ROM-boot command.** Chris approved command
   0 (`UsbRomBoot`) only, for a bootloader reporting exactly 0.0.0, sent only after depthai's own
