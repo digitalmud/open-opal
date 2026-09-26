@@ -86,3 +86,9 @@
   back), and control sends are timed. Four unplug tests on camera 3 recovered with no crash or hang.
 - Found along the way: camera 3's first open always fails once and retries (+~5 s, T-012), and
   Xcode can bundle a stale bridge after bridge edits (build twice; T-013).
+- 14:40: Chris paused the project: "I'm not sure I'm getting much beyond the stock firmware with
+  this." State: T-001/T-006/T-002/T-011 done on master; T-005 (virtual camera, Developer ID; Apple
+  order still processing) on branch `t005-virtual-camera`; follow (T-003, design E1) on
+  `t003-follow-wip`; T-014 (menu-bar presets, the design Chris wants if he continues) in backlog.
+  The deciding test he may run: whether stock auto-exposure/white balance/focus drift bothers him
+  on calls.
