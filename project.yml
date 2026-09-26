@@ -1,7 +1,7 @@
 name: OpenOpal
 
 options:
-  bundleIdPrefix: sh.alistair
+  bundleIdPrefix: ca.digitalmud
   deploymentTarget:
     macOS: "26.0"
   createIntermediateGroups: true
@@ -21,7 +21,9 @@ settings:
     # only works with a genuine team identity. Signed post-build by
     # scripts/sign.sh, which handles the inside-out ordering (extension and
     # dylibs before the app) that codesign requires.
-    DEVELOPMENT_TEAM: RD994J874S
+    # digitalmud fork: no DEVELOPMENT_TEAM here. The team ID lives in an
+    # untracked Local.xcconfig and is filled in by scripts/sign.sh at sign time
+    # (the entitlements below carry a literal $(TEAM_ID) placeholder).
     CODE_SIGN_IDENTITY: "-"
     CODE_SIGNING_REQUIRED: NO
     CODE_SIGNING_ALLOWED: NO
@@ -74,10 +76,10 @@ targets:
         # cannot associate the app with its team+bundle-ID pair — so it finds no
         # extensions belonging to us and reports the misleading
         # "extensionNotFound". OBS's app carries exactly these two.
-        com.apple.application-identifier: RD994J874S.sh.alistair.open-opal
-        com.apple.developer.team-identifier: RD994J874S
+        com.apple.application-identifier: $(TEAM_ID).ca.digitalmud.open-opal
+        com.apple.developer.team-identifier: $(TEAM_ID)
         com.apple.security.application-groups:
-          - group.sh.alistair.open-opal
+          - group.ca.digitalmud.open-opal
     dependencies:
       - target: OpenOpalCameraExtension
         embed: true
@@ -93,7 +95,7 @@ targets:
         codeSign: true
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: sh.alistair.open-opal
+        PRODUCT_BUNDLE_IDENTIFIER: ca.digitalmud.open-opal
         SWIFT_OBJC_BRIDGING_HEADER: Sources/OpenOpal/OpenOpal-Bridging-Header.h
         HEADER_SEARCH_PATHS:
           - $(SRCROOT)/Sources/OpalBridge/include
@@ -129,7 +131,7 @@ targets:
       - path: Sources/OpenOpalCameraExtension
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: sh.alistair.open-opal.camera
+        PRODUCT_BUNDLE_IDENTIFIER: ca.digitalmud.open-opal.camera
         # The bundle must be NAMED after its identifier — Xcode's system
         # extension template does exactly this (PRODUCT_NAME =
         # $(PRODUCT_BUNDLE_IDENTIFIER)), and OBS ships
@@ -137,7 +139,7 @@ targets:
         # lookup matches on the bundle filename, so a bundle called
         # "OpenOpalCameraExtension.systemextension" is invisible to it and comes
         # back as extensionNotFound — even though the identifier inside is right.
-        PRODUCT_NAME: sh.alistair.open-opal.camera
+        PRODUCT_NAME: ca.digitalmud.open-opal.camera
         SWIFT_VERSION: "6.0"
     info:
       path: Sources/OpenOpalCameraExtension/Info.plist
@@ -155,18 +157,18 @@ targets:
           # because the build itself is unsigned (signing happens post-build in
           # scripts/sign.sh), and a Mach service name without the team prefix
           # never matches.
-          CMIOExtensionMachServiceName: group.sh.alistair.open-opal.camera
+          CMIOExtensionMachServiceName: group.ca.digitalmud.open-opal.camera
     entitlements:
       path: Sources/OpenOpalCameraExtension/OpenOpalCameraExtension.entitlements
       properties:
         # CMIO extensions run sandboxed, no exceptions.
         com.apple.security.app-sandbox: true
-        com.apple.application-identifier: RD994J874S.sh.alistair.open-opal.camera
-        com.apple.developer.team-identifier: RD994J874S
+        com.apple.application-identifier: $(TEAM_ID).ca.digitalmud.open-opal.camera
+        com.apple.developer.team-identifier: $(TEAM_ID)
         # THE fix. CMIO validation rejects the extension outright unless its
         # Mach service name is prefixed by one of the App Groups it declares:
         #   "invalid mach service name ... must be prefixed with one of the App
         #    Groups in the entitlement"
         # A bare team-ID prefix is not enough.
         com.apple.security.application-groups:
-          - group.sh.alistair.open-opal
+          - group.ca.digitalmud.open-opal

@@ -53,3 +53,6 @@ Provisioning/
 *.csr
 *.cer
 *.p12
+
+# ---- digitalmud fork: local signing identity (TEAM_ID, IDENTITY) — never commit ----
+Local.xcconfig

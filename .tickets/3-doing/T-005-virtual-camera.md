@@ -180,17 +180,51 @@ PR #1's persistence).
 
 ## Build log (Dev)
 
+Work is on branch `t005-virtual-camera`.
+
 ### What was built
-- 
+- BASELINE: 1 failure. The first check, "team ID committed" (upstream's `RD994J874S` in
+  `project.yml`); expected.
+- **Merged upstream PR #1** (`git fetch upstream pull/1/head:upstream-pr1`, `--no-ff` merge
+  `1da6c10`, 3 commits by the PR author, clean, 11 files). Its checks: `python3 -m unittest
+  discover -s scripts/tests` → `Ran 7 tests … OK`; its Swift test compiled with
+  `swiftc -parse-as-library Sources/OpenOpal/Camera/CameraSettings.swift
+  Tests/CameraSettingsPersistenceTests.swift` → "Camera settings persistence: passed round-trip,
+  reset, defaults, and invalid-data checks".
+- **Identity:** `project.yml` → `ca.digitalmud.open-opal` / `.camera`, App Group
+  `group.ca.digitalmud.open-opal`, Mach service `group.ca.digitalmud.open-opal.camera`;
+  `DEVELOPMENT_TEAM` removed; entitlements carry `$(TEAM_ID)`. `xcodegen generate` regenerated
+  both `.entitlements` and the extension `Info.plist`. Doc leftovers fixed (`docs/RELEASING.md`,
+  a `release.sh` comment). `git grep` for `sh.alistair|RD994J874S|Alistair Smith` (outside
+  vendor/tickets): none.
+- **`scripts/sign.sh`:** reads `TEAM_ID`/`IDENTITY` from `Local.xcconfig` or the environment;
+  refuses a malformed team ID, a missing identity, or an identity for another team; derives the
+  extension path from the app's `CFBundleIdentifier`; renders both entitlements with the real team
+  ID into a `mktemp` dir and signs with those; fails if any `TEAM_ID` text survives rendering.
+  Negative tests: no config → exit 1 ("TEAM_ID missing or malformed…"); wrong team → exit 1
+  ("IDENTITY … is not for team ABCDE12345"); malformed → exit 1. Rendering test with a fake ID:
+  `ABCDE12345.ca.digitalmud.open-opal`, 0 placeholders left, plist parses.
+- `.gitignore` + `Local.xcconfig` (verified with `git check-ignore`); `Local.xcconfig.example`.
+- `docs/INSTALL.md` (40 lines; the Apple checklist Chris is following); README "This fork" note.
+- Unsigned Release build after `xcodebuild clean`: `** BUILD SUCCEEDED **`; bundle ID
+  `ca.digitalmud.open-opal`; extension `ca.digitalmud.open-opal.camera.systemextension`; Mach
+  service `group.ca.digitalmud.open-opal.camera`; `ExtensionInstaller` derives the extension ID
+  from the app (PR #1).
+- `principles: security.secrets-out-of-git`: no team ID, profile or password is in any tracked
+  file; `core.continuation`: adopted PR #1 rather than re-fixing.
+
+### Waiting on (Chris, ask-first steps)
+- Apple setup 1–6 from `docs/INSTALL.md`: certificate, App Group, two App IDs, two profiles
+  into `Provisioning/`, notary credentials, `Local.xcconfig`. Checked 13:1x: none present yet.
 
 ### Verification output
-- 
+- (after the signed install)
 
 ### Open items for Review
 - 
 
 ### Failed attempts
-- 
+- none so far
 
 ## Review
 

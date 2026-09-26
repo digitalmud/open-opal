@@ -47,7 +47,7 @@ base64 values were generated into `~/Library/Application Support/OpenOpal/ci-sec
 | `APP_PROFILE_BASE64` | contents of `ci-secrets/APP_PROFILE_BASE64.txt` |
 | `CAMERA_PROFILE_BASE64` | contents of `ci-secrets/CAMERA_PROFILE_BASE64.txt` |
 | `NOTARY_APPLE_ID` | your Apple ID email |
-| `NOTARY_TEAM_ID` | `RD994J874S` |
+| `NOTARY_TEAM_ID` | `<your team ID>` (never commit it) |
 | `NOTARY_PASSWORD` | an app-specific password from appleid.apple.com |
 
 The certificate and profiles expire (2031) or are invalidated when you change

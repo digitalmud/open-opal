@@ -7,6 +7,13 @@ The C1 is built on Luxonis' [DepthAI](https://github.com/luxonis/depthai-core)
 platform, so it can be driven with open-source tools. Open Opal talks to the
 camera directly over USB.
 
+> **This fork ([digitalmud/open-opal](https://github.com/digitalmud/open-opal))** adds:
+> booting C1s whose DepthAI bootloader reports 0.0.0 (some units ship that way; replug the
+> camera with the app searching, see `docs/BUILD-mudmini.md`); upstream PR #1 (saved settings,
+> dylib bundling, virtual-camera sink fix); its own signing identity (`ca.digitalmud.*`, set up
+> per `docs/INSTALL.md`); and a crop bench (`docs/crop-bench.md`) toward a Center Stage-style
+> follow mode, which is in progress.
+
 <img width="820" alt="Open Opal" src="docs/screenshot.png">
 
 ## Features
