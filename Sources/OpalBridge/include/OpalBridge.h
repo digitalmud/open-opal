@@ -49,6 +49,18 @@ typedef enum {
     OPAL_ORIENT_VFLIP      = 3,
 } OpalOrientation;
 
+// Follow mode (digitalmud fork, T-002): how a movable window is cut out of the
+// 4K sensor frame on the camera, so only 1080p crosses USB. OPAL_CROP_NONE is
+// upstream's pipeline, unchanged. The others are the variants the crop bench
+// compares; see CropPipeline.cpp for what each costs and allows.
+typedef enum {
+    OPAL_CROP_NONE        = 0,
+    OPAL_CROP_MANIP_4K    = 1,  // ImageManip on the 4K ISP frame: 1.0-2.0x zoom
+    OPAL_CROP_MANIP_1440  = 2,  // ImageManip on a 1440p ISP frame: 1.0-1.33x
+    OPAL_CROP_WINDOW_1080 = 3,  // ISP video window 1920x1080 over 4K: 2x, pan only
+    OPAL_CROP_WINDOW_1440 = 4,  // ISP video window 2560x1440 over 4K: pan; host zooms
+} OpalCropMode;
+
 typedef struct {
     // The IMX582 ("LCM48") has NO native 1080p mode — its smallest sensor
     // config is 3840x2160. Pulling full 4K NV12 over USB is ~370 MB/s, which
@@ -66,6 +78,10 @@ typedef struct {
     // ourselves. The ISP does the rotation for free, which also means the fix
     // lands upstream of everything: preview, effects, and the virtual camera.
     OpalOrientation orientation;
+
+    // Follow-mode crop pipeline (see OpalCropMode). Last field, so a zeroed
+    // config keeps upstream's pipeline.
+    OpalCropMode cropMode;
 } OpalPipelineConfig;
 
 // ---------------------------------------------------------------------------
@@ -156,6 +172,13 @@ void opal_set_focus_region(OpalDeviceHandle* h, float x, float y, float w, float
 // person rather than the whole frame — with a bright window behind you, a
 // full-frame average blows out the background and leaves your face in shadow.
 void opal_set_exposure_region(OpalDeviceHandle* h, float x, float y, float w, float h_);
+// Follow mode: move the crop window. Normalised [0,1] rect in the FULL sensor
+// frame (after orientation). Clamped to what the open pipeline's crop mode can
+// do: zoom range, 16:9, inside the frame, never an upscale. Never blocks: a
+// newer window replaces one the camera hasn't taken yet. No-op in OPAL_CROP_NONE.
+void opal_set_crop(OpalDeviceHandle* h, float x, float y, float w, float h_);
+// The window last requested (after clamping). False if the pipeline has no crop.
+bool opal_get_crop(OpalDeviceHandle* h, float* x, float* y, float* w, float* h_);
 
 // --- introspection ---------------------------------------------------------
 bool  opal_get_info(OpalDeviceHandle* h, char* sensorName, size_t n,

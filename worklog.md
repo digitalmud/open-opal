@@ -44,3 +44,24 @@
   A fourth camera wasn't found. Open question for T-002's scope: which sensor follow mode targets.
 - 10:16: Chris chose camera 3 (LCM48) as the follow-mode target and his daily webcam. T-002 is
   measured on it; T-008 drops to low priority (only the spare IMX378 units need a replug now).
+
+---
+
+## 2026-09-26 — T-002 landed: the crop bench, and Chris picked design D
+
+- T-002 was re-scoped from "build the ImageManip crop into the app" to a bench. The reason was
+  prior art on the same camera: jtannahill measured 5.9 fps for an on-camera ImageManip crop.
+  Four pipelines were measured on camera 3, 60 s each with the window still and then moving
+  every frame.
+- ImageManip keeps up while the window stays still but collapses when it moves (4K: 15 fps /
+  124 ms; 1440p: 21 fps / 106 ms; even 10 moves a second only reaches 22 fps). The camera ISP's
+  own video window moves for free: a 1080p window holds 30 fps / 50 ms, a 1440p window
+  30 fps / 58 ms.
+- Chris picked **D**: the ISP pans a 2560×1440 window and the Mac zooms 1.5–2.0× by downscaling.
+  Following has no whole-room view; follow off returns to the full frame. Numbers and caveats
+  are in `docs/crop-bench.md`. T-003 re-scopes around D and must measure the host zoom.
+- Review 1 caught four small failure-path bugs (lock around the send, NaN windows, Ctrl-C not
+  closing the camera, silent sample truncation). All were fixed; two were proven by forcing
+  the failure on camera 3.
+- Camera 3 is Chris's daily webcam now. It shows in macOS as "Opal C1" (not "(ctrl)") and needs
+  no replug; every open was 2–3 s.

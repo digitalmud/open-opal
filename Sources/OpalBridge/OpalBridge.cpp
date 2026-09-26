@@ -1,5 +1,6 @@
 #include "OpalBridge.h"
 
+#include "CropPipeline.hpp"
 #include "LegacyBootloader.hpp"
 
 #include <depthai/depthai.hpp>
@@ -148,6 +149,12 @@ struct OpalDeviceHandle {
     std::deque<double>  latencies;
     std::deque<double>  frameTimes;
     OpalTelemetry       tel{};
+
+    // Follow-mode crop (T-002). Unused in OPAL_CROP_NONE.
+    OpalCropMode                         cropMode = OPAL_CROP_NONE;
+    std::shared_ptr<dai::DataInputQueue> cropQ;
+    std::mutex                           cropMutex;
+    opal::CropRect                       crop;
 };
 
 // Defined below; used by the control thread in opal_open.
@@ -221,7 +228,14 @@ OpalDeviceHandle* opal_open(const char* mxid, OpalPipelineConfig cfg,
         // drop stale ones. A blocking depth-4 queue silently adds up to ~130ms.
         xout->input.setBlocking(false);
         xout->input.setQueueSize(1);
-        cam->video.link(xout->input);
+        // Follow mode swaps in a crop branch (CropPipeline.cpp); mode 0 keeps
+        // upstream's direct link.
+        opal::CropRect cropStart;
+        if(cfg.cropMode == OPAL_CROP_NONE) {
+            cam->video.link(xout->input);
+        } else {
+            cropStart = opal::buildCropBranch(pipeline, cam, xout, cfg.cropMode);
+        }
 
         auto xin = pipeline.create<dai::node::XLinkIn>();
         xin->setStreamName("control");
@@ -329,6 +343,14 @@ OpalDeviceHandle* opal_open(const char* mxid, OpalPipelineConfig cfg,
         h->device   = std::move(dev);
         h->videoQ   = h->device->getOutputQueue("video", 1, /*blocking=*/false);
         h->controlQ = h->device->getInputQueue("control");
+        if(cfg.cropMode != OPAL_CROP_NONE) {
+            // Depth 1, non-blocking: a newer window replaces one not yet sent,
+            // so moving the crop every frame can never stall the caller.
+            h->cropQ    = h->device->getInputQueue("cropcfg", 1, /*blocking=*/false);
+            h->cropMode = cfg.cropMode;
+            h->crop     = cropStart;
+            bootLog(std::string("crop mode: ") + opal::cropModeName(cfg.cropMode));
+        }
         h->cb = cb;
         h->ctx = ctx;
         h->usbSpeed = static_cast<int>(h->device->getUsbSpeed());
@@ -465,6 +487,7 @@ void opal_close(OpalDeviceHandle* h) {
     if(h->control.joinable()) h->control.join();
     h->cb = nullptr;
     h->controlQ.reset();
+    h->cropQ.reset();
     h->videoQ.reset();
     h->device.reset();   // device reboots -> returns to stock UVC in ~5s
     delete h;
@@ -620,6 +643,33 @@ void opal_set_exposure_region(OpalDeviceHandle* h, float x, float y, float w, fl
         ctrl.setAutoExposureRegion(rx, ry, rw, rh);
         h->controlQ->send(ctrl);
     } catch(const std::exception& e) { setError(e.what()); }
+}
+
+void opal_set_crop(OpalDeviceHandle* h, float x, float y, float w, float hh) {
+    if(!h) return;
+    if(!h->cropQ) {
+        static std::atomic<bool> warned{false};
+        if(!warned.exchange(true)) bootLog("opal_set_crop ignored: pipeline opened without a crop mode");
+        return;
+    }
+    try {
+        dai::ImageManipConfig cfg;
+        // Send and record under one lock, so opal_get_crop always reports the
+        // window sent last. The send never blocks (depth-1 queue).
+        std::lock_guard<std::mutex> lk(h->cropMutex);
+        h->crop = opal::applyCropConfig(h->cropMode, opal::CropRect{x, y, w, hh}, cfg, h->crop);
+        h->cropQ->send(cfg);
+    } catch(const std::exception& e) { setError(e.what()); }
+}
+
+bool opal_get_crop(OpalDeviceHandle* h, float* x, float* y, float* w, float* hh) {
+    if(!h || !h->cropQ) return false;
+    std::lock_guard<std::mutex> lk(h->cropMutex);
+    if(x) *x = h->crop.x;
+    if(y) *y = h->crop.y;
+    if(w) *w = h->crop.w;
+    if(hh) *hh = h->crop.h;
+    return true;
 }
 
 bool opal_get_info(OpalDeviceHandle* h, char* sensorName, size_t n,

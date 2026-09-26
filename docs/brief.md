@@ -1,7 +1,7 @@
 # open-opal — follow mode for the Opal C1
 
 **Area:** Personal / System
-**Status:** 2026-09-26: upstream builds and streams on mudmini (T-001: 30.1 fps, p50 51 ms at 1080p). Chris's C1 needed a bridge fix to boot at all (T-006: its bootloader reports 0.0.0). Release `c1-follow`: T-001 and T-006 done; next T-002 (crop spike); T-007–T-009 backlog.
+**Status:** 2026-09-26: upstream builds and streams on mudmini (T-001: 30.1 fps, p50 51 ms at 1080p). Chris's C1 needed a bridge fix to boot at all (T-006: its bootloader reports 0.0.0). Release `c1-follow`: T-001, T-006, T-002 done (crop design D picked); next T-003 (follow servo); T-007–T-009 backlog.
 
 ## Overview
 
@@ -14,13 +14,15 @@ keeps him framed by moving and resizing a crop window over the full 4K frame and
 
 ## Context
 
-- **Build order:** T-001 baseline build and run → T-002 crop pipeline spike (the design gate:
-  can the camera crop+resize 4K→1080p at ≥28 fps and ≤90 ms?) → T-003 follow servo →
+- **Build order:** T-001 baseline build and run → T-002 crop bench (the design gate, done
+  2026-09-26: design D, see Decisions) → T-003 follow servo →
   T-004 controls and persistence → T-005 signed build and virtual camera.
 - **Why the crop must happen on the camera:** full 4K NV12 over USB is ~370 MB/s, measured
   ~300 ms latency at 20 fps (upstream README). Upstream downscales on the ISP to 1080p for
-  ~45 ms. Follow mode instead keeps the ISP at 4K and adds an `ImageManip` node that crops a
-  moving window and resizes to 1920×1080 before the frame crosses USB. Bandwidth stays 1080p.
+  ~45 ms. Follow mode instead keeps the ISP at 4K and has the ISP itself cut a 2560×1440
+  `video` window that moves at runtime (`ColorCamera.inputConfig`); the Mac then zooms within
+  it to 1920×1080 by downscaling. Measured 30 fps, p50 58 ms with the window moving every frame
+  (`docs/crop-bench.md`). An `ImageManip` crop, the original plan, measured 15 fps when moving.
 - **Why face detection stays on the host:** Apple Vision face rectangles run in ~5 ms a frame
   on the Mac; a detection network on the VPU costs about a third of throughput (jtannahill's
   measurements). The host runs a closed-loop servo: detect on the received 1080p frame,
@@ -108,11 +110,17 @@ keeps him framed by moving and resizing a crop window over the full 4K frame and
   has the DepthAI bridge, Metal path, controls UI and CMIO virtual camera in Swift; follow
   mode is one feature on top. Python + pyvirtualcam was the faster prototype but a second
   app to maintain.
-- **2026-09-26 — Crop on the camera (ImageManip), detect on the host (Vision).** See Context
-  for the bandwidth and throughput reasons. T-002 is the spike that confirms the numbers
-  before T-003 builds the servo on it.
+- **2026-09-26 — Crop on the camera, detect on the host (Vision).** See Context for the
+  bandwidth and throughput reasons. (The camera-side mechanism was first planned as
+  `ImageManip`; T-002 measured it and it lost to the ISP window, below.)
 - **2026-09-26 — Follow is a cold setting.** Turning it on swaps the pipeline (ISP 4K +
-  ImageManip) and rebuilds; off returns to upstream's ISP-downscale path unchanged, so the
+  a moving 1440p video window) and rebuilds; off returns to upstream's ISP-downscale path unchanged, so the
   default experience is never slower than upstream.
-- **2026-09-26 — Zoom range is 1.0× to 2.0×, never upscaled.** The crop window is between the
-  full 3840×2160 frame and 1920×1080; output is always a downscale or 1:1.
+- **2026-09-26 — Never upscale.** Output is always a downscale or 1:1 of real sensor pixels.
+  ~~Zoom range 1.0× to 2.0×~~: superseded by the next decision. While following, the zoom is
+  1.5–2.0×; follow off is the 1.0× whole-room view.
+- **2026-09-26 — Follow mode uses design D (T-002, Chris's pick).** The camera's ISP moves a
+  2560×1440 window over the 4K frame (30 fps, p50 58 ms, measured moving every frame), and the
+  Mac zooms 1.5–2.0× within it by downscaling to 1080p. No whole-room view while following;
+  turning follow off returns to today's full-frame pipeline (~3 s switch). The fallback, if
+  host zoom proves costly in T-003, is C (a 1080p window, pan only, 2× fixed, p50 50 ms).

@@ -20,6 +20,13 @@ for the app: the follow cold setting, the Swift `setCrop`/`currentCrop` plumbing
 focus/exposure regions through the live crop rect. All of it for the **chosen** design. Re-scope
 after T-002 closes.
 
+**2026-09-26, T-002 closed: Chris picked design D** (`docs/crop-bench.md`; the bridge's
+`OPAL_CROP_WINDOW_1440`, moved with `opal_set_crop`). Re-scope around it: the camera delivers a
+2560×1440 window it pans at runtime; the Mac zooms 1.5–2.0× within it by downscaling to 1080p
+(measure that cost); follow off = the normal full-frame pipeline. Region mapping goes through
+the window position plus the host zoom. Anything in the text below that assumes a 1080p crop
+straight from the camera is out of date.
+
 With T-002's movable window in place, this ticket makes it follow Chris: detect the face on
 each received 1080p frame with Apple Vision, and steer the crop so the face sits where a good
 framing puts it, at a zoom that gives head-and-shoulders. This is the feature. It must feel
