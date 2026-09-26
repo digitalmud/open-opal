@@ -124,6 +124,11 @@ echo T-002 verification OK
 
 ## Notes
 
+- 2026-09-26 (from T-001/T-006): depthai reports this C1's sensor as **IMX378**, not the brief's
+  IMX582. Check the real sensor modes and 4K fps before sizing the crop. Opening this camera needs
+  a replug with the app searching (`docs/BUILD-mudmini.md`). Baseline at 1080p ISP-downscale:
+  30.1 fps, p50 51–52 ms (`opal_get_telemetry`).
+
 - depthai docs: ImageManip / ImageManipConfig (`setCropRect`, `setResize`), ColorCamera `isp`
   output; jtannahill/opal-c1-depthai ran five ImageManip crops off a 4K stream on this same
   hardware, so the node handles 4K input. Mixed frame rates stall the pipeline: keep one fps.

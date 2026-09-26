@@ -1,5 +1,7 @@
 #include "OpalBridge.h"
 
+#include "LegacyBootloader.hpp"
+
 #include <depthai/depthai.hpp>
 
 #include <algorithm>
@@ -280,7 +282,23 @@ OpalDeviceHandle* opal_open(const char* mxid, OpalPipelineConfig cfg,
                 for(const auto& info : dai::Device::getAllAvailableDevices()) {
                     if(info.getMxId() == std::string(mxid)) {
                         bootLog(std::string("target: mxid ") + mxid + " · resetting VPU, uploading firmware over XLink");
-                        dev = std::make_unique<dai::Device>(pipeline, info, dai::UsbSpeed::SUPER_PLUS);
+                        try {
+                            dev = std::make_unique<dai::Device>(pipeline, info, dai::UsbSpeed::SUPER_PLUS);
+                        } catch(const std::exception& e) {
+                            // depthai refuses a C1 whose bootloader reports 0.0.0. Kick it
+                            // into USB ROM boot and try once more (LegacyBootloader.cpp).
+                            if(!opal::isLegacyBootloaderRefusal(e)) throw;
+                            auto rom = opal::kickLegacyBootloaderToRom(info.getMxId(), bootLog);
+                            if(!rom) throw;
+                            try {
+                                dev = std::make_unique<dai::Device>(pipeline, *rom, dai::UsbSpeed::SUPER_PLUS);
+                            } catch(const std::exception& e2) {
+                                // The chip is in USB ROM boot with no firmware: only a replug
+                                // brings the stock webcam back. Say so.
+                                throw std::runtime_error(std::string(e2.what()) +
+                                    " · the camera is in USB boot mode: unplug and replug it to get the webcam back");
+                            }
+                        }
                         found = true;
                         break;
                     }

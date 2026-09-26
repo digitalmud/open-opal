@@ -2,11 +2,12 @@
 id: T-001
 type: ticket
 title: Build and run upstream Open Opal on mudmini
-status: doing
+status: done
 priority: high
 tags: [build, baseline, xcode]
 created: 2026-09-26
 updated: 2026-09-26
+closed: 2026-09-26
 depends_on: []
 kind: chore
 release: c1-follow
@@ -105,6 +106,7 @@ echo T-001 verification OK
 - Upstream README § Building and § The hardware. `scripts/bootstrap.sh` already carries the
   zlib/CMake 4 workarounds; if Hunter fails on something new, record the fix in the doc.
 
+- 2026-09-26 close: upstream builds (Xcode 26.6) and streams on mudmini at 30.1 fps / p50 51 ms, but only with T-006's bridge fix for this C1's 0.0.0 bootloader; steps in docs/BUILD-mudmini.md.
 ---
 
 ## Principles in scope
@@ -160,12 +162,32 @@ flips to done.
   The binary carries only the linker's ad-hoc signature, `TeamIdentifier=not set`, so upstream's
   team ID was never applied and `project.yml` stayed unedited.
 - Run: the app launches, but shows **"No Opal C1 found"** with the C1 plugged in. See Open items.
+  Resolved by **T-006** (Chris chose a separate ticket), which adds a bridge path for this
+  camera's 0.0.0 bootloader. T-001 then finished on top of T-006's Release build.
+- Streaming (09:23:25 onwards, T-006 build, through Chris's USB 3.1 hub at 5 Gb/s):
+  **1080p · 30 fps · 54 ms** latency, read by Chris off the toolbar after >60 s. The window
+  capture would have stored live video of Chris; a crop attempt missed the toolbar and was
+  deleted, so the toolbar reading is the record (Charter fallback).
+- Quit → stock "Opal C1 (ctrl)" back after **7 s**.
+- `docs/BUILD-mudmini.md` written (39 lines): toolchain steps that differ from upstream's README,
+  the replug routine for this camera, the numbers.
+- `project.yml` untouched.
 - In-latitude note: a full-screen `screencapture` caught unrelated windows (a password
   manager); both images were deleted immediately. From here on, only window-scoped captures
   (`screencapture -l <windowID>`).
 
 ### Verification output
-- Not run yet; the streaming step is blocked (see Open items).
+Telemetry line (T-006 hardware run 4, 09:39, `opal_get_telemetry` after 60 s; the same bridge
+as the Release app):
+```
+TELEMETRY t=60s: 30.1 fps | p50 latency 52.2 ms | frames 1805
+```
+Verification block:
+```
+T-001 verification OK
+```
+(09:25, after quitting the app. Every check in the block passed: app bundle, doc with fps and
+latency, compiled model, app not running, Opal C1 listed.)
 
 ### Open items for Review
 - **Discovery blocker.** A discovery-only probe (`opal_list_devices`, which boots nothing on the
@@ -176,7 +198,12 @@ flips to done.
   `OpalBridge.cpp:175–177` accepts only `FLASH_BOOTED`, `UNBOOTED` and `BOOTLOADER`, and its
   header labels `FLASH_BOOTED` as "stock Opal firmware". So this C1's stock firmware presents
   differently from the camera upstream built against. Getting past this needs a code change,
-  which is outside T-001's scope, so it goes back to Chris.
+  which is outside T-001's scope, so it goes back to Chris. **→ Resolved by T-006** (the
+  watcher found a ~5 s BOOTLOADER window at power-on; its bootloader reports 0.0.0).
+- The streaming run used T-006's bridge, so "upstream as-is" was never streamed on this camera,
+  and can't be. Review both tickets together.
+- ~~Numbers were a human read~~: the pasted telemetry line above (30.1 fps, 52.2 ms) agrees with
+  Chris's toolbar read (30 fps, 54 ms).
 
 ### Failed attempts
 - ATTEMPT 1 [L1]: xcodebuild before first-launch → "failed to load a required plug-in …
@@ -188,4 +215,37 @@ flips to done.
 
 ## Review
 
-_Review stage fills this in._
+join-verify: exit 0 @ b88d28d (bash)
+
+Review, 2026-09-26 ~09:57. T-001's own diff is docs only (`docs/BUILD-mudmini.md`, the ticket),
+so the effort is **low**. The `/code-review` passes run for T-006 (high ×3) covered the whole
+working tree, this doc included.
+
+### Verification limitations
+- `~/Code/scripts/stage-verify` → `STAGE-VERIFY: FAIL (exit 1)` on the first line
+  (`test -d build/DerivedData/…/OpenOpal.app`): the sandbox copies tracked files only, and the
+  app build is gitignored and machine-local (Charter: "main checkout, not a worktree"). Run with
+  `bash` from the checkout: `T-001 verification OK`, exit 0 (09:56, after the final app run).
+
+### Acceptance criteria
+- `xcodebuild … build` exit 0, `OpenOpal.app` under `build/DerivedData/…/Release/`: met.
+- Streams from the C1, with a telemetry line after 60 s: met. `30.1 fps | p50 latency 51.2 ms`
+  (T-006 run 6, same bridge); final Release app streamed at 09:56:08 (log: `streaming … from
+  IMX378`, 10.7 s after `booting pipeline`), with Chris confirming. Earlier toolbar read: 30 fps · 54 ms.
+- After quitting, "Opal C1 (ctrl)" is back: met (6–7 s across runs).
+- `docs/BUILD-mudmini.md` with commands and numbers: met (39 lines).
+- § Verification: met (above).
+
+### Findings
+- P3: `worklog.md` is in Files touched but not yet appended. → /deploy writes it.
+- P3: `docs/BUILD-mudmini.md` still shows the 52.2 ms run-4 figure; run 6's is 51.2 ms. Same
+  result, both real measurements; leave it.
+- P3, doc impact (Plan): `docs/brief.md` Status, § Context "ninja, xcodegen, Xcode missing", and
+  § Hardware facts (sensor IMX582 vs the reported IMX378; f63b / 0.0.0) are stale. → /deploy.
+- Out-of-scope effect, justified: the streaming run needed T-006's bridge; "upstream as-is"
+  can't stream on this camera. Recorded in the Build log.
+
+Silencing scan: none (the verification block was only tightened at scope). Principles: all
+held; `verification.measure-first` is met by the pasted telemetry line.
+
+**Verdict: clear** — clear for /deploy together with T-006 (T-001's streaming depends on it)

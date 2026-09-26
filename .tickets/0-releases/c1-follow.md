@@ -9,7 +9,7 @@ dashboard:
   health: on-track
   summary: Keep the Opal C1 useful after Composer by adding a follow-me crop that reads the 4K sensor and ships 1080p.
   deliverables:
-    - { label: "Upstream builds and streams on mudmini", status: pending }
+    - { label: "Upstream builds and streams on mudmini", status: done }
     - { label: "4K→1080p on-camera crop measured within budget", status: pending }
     - { label: "Follow mode tracks Chris in a call", status: pending }
     - { label: "Signed build with virtual camera in /Applications", gate: "Apple Developer team decision" }
@@ -49,8 +49,11 @@ PR (welcome later, not a deliverable).
 
 ### `~/Developer/open-opal/.tickets/`
 
-- T-001 — Build and run upstream Open Opal on mudmini — doing (sprint 1; waits on T-006)
-- T-006 — Boot a C1 whose bootloader reports 0.0.0 (send the bare USB-ROM-boot command) — doing (sprint 1; found in T-001)
+- T-001 — Build and run upstream Open Opal on mudmini — done 2026-09-26 (sprint 1)
+- T-006 — Boot a C1 whose bootloader reports 0.0.0 (send the bare USB-ROM-boot command) — done 2026-09-26 (sprint 1; found in T-001)
+- T-007 — Harden the legacy-bootloader path (T-006 deferred review findings) — backlog (sprint 2; depends T-006)
+- T-008 — Easier way into the C1's bootloader window (no manual "Try again, then replug") — backlog (sprint 3; depends T-006)
+- T-009 — Upstream bridge CMakeLists names a missing test/region_test.c — backlog (sprint 2)
 - T-002 — Spike: on-camera 4K→1080p crop pipeline with a movable window — backlog (sprint 1; depends T-001)
 - T-003 — Follow mode: Vision face servo drives the crop window — backlog (sprint 2; depends T-002)
 - T-004 — Follow controls: toggle, framing presets, speed; persist settings — backlog (sprint 3; depends T-003)
@@ -63,3 +66,4 @@ PR (welcome later, not a deliverable).
 ## Revision log
 
 - 2026-09-26 — created at project open (Chat, Code/T-731).
+- 2026-09-26 — T-001 and T-006 done: upstream streams on mudmini after a bridge fix for this C1's 0.0.0 bootloader. T-007–T-009 filed from T-006's deferred review findings.

@@ -1,7 +1,7 @@
 # open-opal — follow mode for the Opal C1
 
 **Area:** Personal / System
-**Status:** Repo opened 2026-09-26 from Chat (Code/T-731). Fork of `alii/open-opal` cloned; nothing built yet. Blocker to clear first: Xcode is not installed on mudmini (only Command Line Tools), and upstream needs Xcode 26. Release `c1-follow`, tickets T-001 → T-005.
+**Status:** 2026-09-26: upstream builds and streams on mudmini (T-001: 30.1 fps, p50 51 ms at 1080p). Chris's C1 needed a bridge fix to boot at all (T-006: its bootloader reports 0.0.0). Release `c1-follow`: T-001 and T-006 done; next T-002 (crop spike); T-007–T-009 backlog.
 
 ## Overview
 
@@ -33,11 +33,18 @@ keeps him framed by moving and resizing a crop window over the full 4K frame and
   is refused by AMFI). Without a Developer ID the app runs and previews but Zoom/Meet can't see
   it. Decision needed from Chris at T-005: use a digitalmud Apple Developer team, or fall back
   to a Syphon/NDI feed into OBS (installed, its virtual camera is already signed).
-- Machine: mudmini, macOS 26.5.2, Apple silicon, Swift 6.3 toolchain via CLT. `cmake` present;
-  `ninja`, `xcodegen`, Xcode missing as of 2026-09-26.
+- Machine: mudmini, macOS 26.5.2, Apple silicon. Xcode 26.6 (plus first-launch components and
+  the Metal toolchain), `cmake`, `ninja`, `xcodegen` installed 2026-09-26; exact steps in
+  `docs/BUILD-mudmini.md`.
 - Chris's existing camera apps: OBS, Hovercraft (presenter overlay, not a tracker).
 
 ## Hardware and pipeline facts (from upstream, verified against source 2026-09-26)
+
+- **Chris's C1 differs from upstream's (measured 2026-09-26, T-001/T-006):** USB `03e7:f63b` as a
+  webcam (upstream: `f63d`); DepthAI bootloader reports **0.0.0** (upstream: 0.0.15); in its
+  bootloader for only ~5 s after power-on; plain-UVC modes: 1080p60 only; depthai names the sensor
+  **IMX378**, not the IMX582 below. Booting needs the T-006 kick and a replug with the app searching
+  (`docs/BUILD-mudmini.md`). T-002 must check the real sensor modes before relying on the list below.
 
 - Pipeline today: `ColorCamera` (THE_4_K, `setIspScale(1,2)` for 1080p) → `video` (NV12) →
   `XLinkOut "video"`; `XLinkIn` carries `CameraControl`. `Sources/OpalBridge/OpalBridge.cpp`
@@ -80,6 +87,11 @@ keeps him framed by moving and resizing a crop window over the full 4K frame and
 | `~/Code/knowledge/verification-runs-in-stage-environment.md` | how verification blocks must be written |
 
 ## Decisions
+
+- **2026-09-26: Send this C1's bootloader the bare USB-ROM-boot command.** Chris approved command
+  0 (`UsbRomBoot`) only, for a bootloader reporting exactly 0.0.0, sent only after depthai's own
+  attempt refuses it. It writes nothing, and a replug restores stock. The alternative that
+  depthai's own warning suggests (flash a newer bootloader) stays forbidden (T-006).
 
 - **2026-09-26 — Fork upstream rather than start from the Python projects.** Upstream already
   has the DepthAI bridge, Metal path, controls UI and CMIO virtual camera in Swift; follow
