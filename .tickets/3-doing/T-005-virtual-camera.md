@@ -2,7 +2,7 @@
 id: T-005
 type: ticket
 title: Virtual camera working — adopt upstream PR #1, our identity, Developer ID sign + notarize, /Applications
-status: todo
+status: doing
 priority: high
 tags: [signing, notarization, virtual-camera, release]
 created: 2026-09-26
