@@ -2,7 +2,7 @@
 id: T-003
 type: ticket
 title: Follow plumbing — 1440p camera window + Mac zoom, view-rect API, focus mapping, hand-steered
-status: todo
+status: blocked
 priority: high
 tags: [follow, swift, videotoolbox, bridge]
 created: 2026-09-26
@@ -197,17 +197,52 @@ the clean-aperture attachment.
 
 ## Build log (Dev)
 
-### What was built
-- 
+**PAUSED by Chris, 2026-09-26 12:49** ("let's pause on the follow and get the virtual camera
+working 100%"). The code is on branch **`t003-follow-wip`** (`294d91f`, pushed to origin),
+unreviewed; `master` has none of it. Resume by checking out that branch and moving this ticket
+back to `3-doing`.
 
-### Verification output
-- 
+### What was built (on the branch)
+- BASELINE: 1 failure. `grep … HostZoom.swift` (the file didn't exist yet; expected).
+- **Delay probe** (`crop_bench --delay-probe`): a move of the camera's window applies from the
+  next frame captured (last old frame ≤1.9 ms, first new ≥1.3 ms after the send; `mixed=0`).
+  Recorded in `docs/crop-bench.md` § Window-apply delay (on the branch). Charter correction: the
+  threshold is the old/new boundary (~1.6 ms), not "(min+max)/2 of first-new".
+- **Design changed mid-build: D → E1** (Chris, 2026-09-26 ~12:35, after watching D:
+  "very jittery, and way too close … It should frame me like a normal video call"). The jitter
+  was my test sweep's deliberate 5 % steps; "too close" was real, since D's widest view is 1.5×.
+  Measured on camera 3 (`crop_bench --modes 0 --isp …`, 60 s):
+  - E1, the whole frame at 2560×1440 (ISP 2/3): 30.00 fps · p50 58.0 · p95 60.7 ms, zoom 1.0–1.33×;
+  - E2, 2880×1620 (ISP 3/4): 29.99 fps · p50 63.5 · p95 67.0 ms, zoom 1.0–1.5×.
+  Chris picked **E1**. The camera never moves a window in E1, so the frame-to-window matching,
+  the window sender and the capture-time stamp were removed again.
+- On the branch now: `Follow/FollowView.swift` (pure geometry, 1.0–1.33×),
+  `Follow/HostZoom.swift` (`VTPixelTransferSession`, clean-aperture crop),
+  `Follow/FollowPipeline.swift` (view rect + zoom); `CameraSettings.followEnabled` (cold);
+  `OpalDevice` (follow → ISP 2/3; `followOpen`; a telemetry log line every ~4 s);
+  `CameraModel` (zoom before render; focus and metering mapped through the view; toggle and
+  hand-steering); Camera menu items; `Tests/FollowViewCheck` (swiftc; passes, and a seeded clamp
+  bug is caught).
+- Live, E1, the app on camera 3, 12:44: **30.0 fps · p50 56.5–57.7 ms** (bridge telemetry) while
+  hand-panning and zooming; host zoom **p50 0.85–1.6 ms, p95 ≤3.0 ms**; view 1.00×–1.33×; depthai
+  stderr clean.
 
-### Open items for Review
-- 
+### Open items (for when this resumes)
+- The ticket text (Description, Charter, Verification) still describes D. **Re-scope for E1**
+  before building further (the verification greps for `OPAL_CROP_WINDOW_1440`, which E1 no longer uses).
+- Human checks not done: no-jump verdict, tap-to-focus while zoomed, whether 1.0–1.2× is
+  "normal call" framing.
+- A **freeze** happened once during Chris's hand-steering under design D (~11:20). The link to
+  the camera dropped, then upstream's watchdog called `opal_close`, and depthai's close
+  deadlocked (main thread stuck in `DeviceBase::closeImpl → hasCrashDump → XLinkWriteData`
+  while another thread was in `dispatcherReset`). Not reproduced in 12 min of automated sweeps.
+  The cause of the drop is unknown (the logs had rotated); the hang itself is filed as **T-011**.
+- Camera 3 twice failed to reopen right after the app quit ("Couldn't read data from stream:
+  '__bootloader'", "Couldn't get bootloader version"); the third try worked. depthai warns that
+  bootloader 0.0.15 is "susceptible to bootup/restart failure". The app retries 4×.
 
 ### Failed attempts
-- 
+- none (the design change was Chris's call, not a failed fix)
 
 ## Review
 
