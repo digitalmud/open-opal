@@ -148,16 +148,43 @@ flips to done.
 ## Build log (Dev)
 
 ### What was built
-- 
+- BASELINE: 1 failure — `test -d …/OpenOpal.app` (the app isn't built yet; expected).
+- Toolchain: Chris installed Xcode 26.6 (17F113) by hand, ran `xcode-select -s` and accepted
+  the licence (08:58). `xcodebuild -runFirstLaunch` (no sudo needed) installed
+  CoreSimulator. `xcodebuild -downloadComponent MetalToolchain` fetched the Metal compiler
+  (688 MB; Xcode 26 no longer bundles it). `brew install ninja xcodegen`.
+- `scripts/bootstrap.sh` exit 0 → `vendor/install/lib/libdepthai-core.dylib` (16 MB) +
+  `libusb-1.0.dylib`. `scripts/fetch-models.sh` exit 0 → `Models/DepthAnythingV2SmallF16.mlmodelc`.
+- `xcodegen generate`, then the Release `xcodebuild` → `** BUILD SUCCEEDED **`. Nine
+  warnings, all upstream's (Swift 6 concurrency, one deprecation, one duplicate rpath).
+  The binary carries only the linker's ad-hoc signature, `TeamIdentifier=not set`, so upstream's
+  team ID was never applied and `project.yml` stayed unedited.
+- Run: the app launches, but shows **"No Opal C1 found"** with the C1 plugged in. See Open items.
+- In-latitude note: a full-screen `screencapture` caught unrelated windows (a password
+  manager); both images were deleted immediately. From here on, only window-scoped captures
+  (`screencapture -l <windowID>`).
 
 ### Verification output
-- 
+- Not run yet; the streaming step is blocked (see Open items).
 
 ### Open items for Review
-- 
+- **Discovery blocker.** A discovery-only probe (`opal_list_devices`, which boots nothing on the
+  camera) reports `mxid=14442C1091BB99D600 state=2 usable=0`. Here state 2 is `BOOTED`. USB ID
+  `0x03e7:0xf63b`, 5 Gb/s. Same result after Chris replugged the camera (09:0x), and again
+  after he moved it off his external USB 3.1 hub onto a port on the Mac (09:11; location
+  `0x03210000`), so the hub is ruled out. Upstream's
+  `OpalBridge.cpp:175–177` accepts only `FLASH_BOOTED`, `UNBOOTED` and `BOOTLOADER`, and its
+  header labels `FLASH_BOOTED` as "stock Opal firmware". So this C1's stock firmware presents
+  differently from the camera upstream built against. Getting past this needs a code change,
+  which is outside T-001's scope, so it goes back to Chris.
 
 ### Failed attempts
-- 
+- ATTEMPT 1 [L1]: xcodebuild before first-launch → "failed to load a required plug-in …
+  CoreSimulator" → fixed with `xcodebuild -runFirstLaunch`.
+- ATTEMPT 2 [L1]: xcodebuild → "cannot execute tool 'metal' due to missing Metal Toolchain" →
+  fixed with `xcodebuild -downloadComponent MetalToolchain`.
+- (bootstrap run 1 died with "You have not agreed to the Xcode license agreements" when Xcode
+  became active mid-build. That was a licence gate, not a fix failure; run 2 exit 0.)
 
 ## Review
 
