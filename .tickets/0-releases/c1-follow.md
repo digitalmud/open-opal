@@ -55,8 +55,9 @@ PR (welcome later, not a deliverable).
 - T-008 — Easier way into the C1's bootloader window (no manual "Try again, then replug") — backlog (sprint 3; depends T-006)
 - T-009 — Upstream bridge CMakeLists names a missing test/region_test.c — backlog (sprint 2)
 - T-002 — Crop bench: measure four on-camera crop pipelines against the follow-mode budget — done 2026-09-26 (sprint 1; design D picked)
-- T-003 — Follow mode: Vision face servo drives the crop window — backlog (sprint 2; depends T-002)
-- T-004 — Follow controls: toggle, framing presets, speed; persist settings — backlog (sprint 3; depends T-003)
+- T-003 — Follow plumbing: 1440p camera window + Mac zoom, view-rect API, focus mapping, hand-steered — todo (sprint 2; depends T-002)
+- T-010 — Follow servo: Vision faces steer the view rect, Center Stage feel — backlog (sprint 2; depends T-003; split from T-003)
+- T-004 — Follow controls: toggle, framing presets, speed; persist settings — backlog (sprint 3; depends T-010)
 - T-005 — Signed Release build, virtual camera install, /Applications — backlog (sprint 3; depends T-001)
 
 ## Linked specs
@@ -68,3 +69,4 @@ PR (welcome later, not a deliverable).
 - 2026-09-26 — created at project open (Chat, Code/T-731).
 - 2026-09-26 — T-001 and T-006 done: upstream streams on mudmini after a bridge fix for this C1's 0.0.0 bootloader. T-007–T-009 filed from T-006's deferred review findings.
 - 2026-09-26 — T-002 done: ISP 1440p window + host zoom (design D) passes at 30 fps / 58 ms; ImageManip fails when moving. Chris picked D; T-003 re-scopes around it.
+- 2026-09-26 — T-003 split (Chris): T-003 = follow plumbing (design D in the app, hand-steered), T-010 = the face servo. T-004 now depends on T-010.

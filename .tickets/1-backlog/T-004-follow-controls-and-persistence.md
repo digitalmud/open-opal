@@ -7,7 +7,7 @@ priority: medium
 tags: [ui, settings, swiftui]
 created: 2026-09-26
 updated: 2026-09-26
-depends_on: [T-003]
+depends_on: [T-010]
 release: c1-follow
 sprint: 3
 ---
