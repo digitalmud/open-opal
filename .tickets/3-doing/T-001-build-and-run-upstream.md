@@ -2,7 +2,7 @@
 id: T-001
 type: ticket
 title: Build and run upstream Open Opal on mudmini
-status: backlog
+status: doing
 priority: high
 tags: [build, baseline, xcode]
 created: 2026-09-26
@@ -57,9 +57,13 @@ Total: ≤3 files, <80 LOC.
 
 | Decision | Choice |
 |---|---|
-| Xcode source | App Store via `mas`; fall back to Chris installing by hand |
+| Xcode source | ~~App Store via `mas`~~ → **Chris installs Xcode by hand** (his answer, 2026-09-26 08:54); the build waits for `/Applications/Xcode.app` |
 | Build config for daily use | Release (upstream: Debug stutters) |
 | Virtual camera in this ticket | No — unsigned builds can't load it; that is T-005 |
+| Where the build runs | The main checkout, not a worktree: `build/`, `vendor/`, `Models/` are gitignored, machine-local and several GB |
+| `project.yml` team ID | Leave it. `CODE_SIGNING_ALLOWED: NO` means Xcode never applies it; only edit if xcodebuild actually errors on the team |
+| If the unsigned app won't launch | Ad-hoc sign the build output (`codesign --force --sign -`, dylibs first, no entitlements, no team). No certificate or keychain involved, so it stays inside "ship freely" |
+| How the fps/latency numbers are read | The toolbar is the only surface (`ContentView.swift:152–172`, from `opal_get_telemetry`); no log line exists and T-001 adds no code. Screenshot the window with `screencapture`; if Screen Recording is denied, Chris reads the two numbers off the toolbar (human step) |
 
 ## Acceptance criteria
 
@@ -77,6 +81,10 @@ test -d build/DerivedData/Build/Products/Release/OpenOpal.app
 test -s docs/BUILD-mudmini.md
 grep -q -i 'fps' docs/BUILD-mudmini.md
 grep -q -i 'latency' docs/BUILD-mudmini.md
+# the depth model compiled (needs full Xcode's coremlcompiler)
+test -d Models/DepthAnythingV2SmallF16.mlmodelc
+# the app is not left holding the camera, and the stock UVC device is back
+if pgrep -x OpenOpal >/dev/null; then echo "OpenOpal still running"; exit 1; fi
 system_profiler SPCameraDataType | grep -q 'Opal C1'
 echo T-001 verification OK
 ```
@@ -101,11 +109,41 @@ echo T-001 verification OK
 
 ## Principles in scope
 
-_Scope stage fills this in._
+`core.verify-first` · `verification.run-it` · `verification.measure-first` (numbers from telemetry, pasted) · `verification.stage-runnable` (block runs in the main checkout, see Charter) · `verification.behavioral-gap` (the toolbar read may be a labelled human step) · `security.secrets-out-of-git` (no team ID committed) · `core.problem-boundary` (no pipeline code here)
 
 ## Plan
 
-_Scope stage fills this in._
+Scoped 2026-09-26 in the session Chris opened. The ticket was moved straight to `3-doing` at
+his instruction, so it skips `2-todo`.
+
+**Done already (no Xcode needed):**
+- `brew install ninja xcodegen` — exit 0.
+- `scripts/fetch-models.sh` — download complete; the compile step failed with
+  `xcrun: error: unable to find utility "coremlcompiler"` (exit 72). That tool ships only with
+  full Xcode. Rerun the script after Xcode; it skips files already downloaded.
+- `scripts/bootstrap.sh` — running (Hunter building deps). CLT's clang is enough for it.
+
+**After Chris installs Xcode:**
+1. `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer` and
+   `sudo xcodebuild -license accept` — both need Chris's password; hand him the two lines to
+   run with `!`. Then `xcodebuild -runFirstLaunch` if Xcode asks for it.
+2. Rerun `scripts/fetch-models.sh` → `Models/DepthAnythingV2SmallF16.mlmodelc` exists.
+3. `xcodegen generate`, then the Release `xcodebuild` from § What to build step 4. Log to
+   `build/xcodebuild.log`.
+4. Launch the app with the C1 plugged in; stream 60 s; read fps and latency (Charter row);
+   quit with `osascript -e 'quit app "Open Opal"'`; confirm `pgrep -x OpenOpal` is empty and
+   `system_profiler SPCameraDataType` lists the Opal C1 again.
+5. Write `docs/BUILD-mudmini.md`; append the worklog.
+
+**Things that could bite, found while scoping:**
+- `sign.sh` hard-codes upstream's identity and `Provisioning/` profiles; don't run it (T-005).
+- The entitlements file carries upstream's team ID (`RD994J874S`) but is never applied while
+  signing is off. T-005 deals with it.
+- Upstream's README says "Xcode 26"; the Mac runs macOS 26.5.2, so current App Store Xcode fits.
+
+**Doc impact for /deploy:** `docs/brief.md` Status line and the "ninja, xcodegen, Xcode
+missing" line in § Context go stale once this lands; the release manifest's first deliverable
+flips to done.
 
 ## Build log (Dev)
 

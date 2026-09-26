@@ -49,7 +49,7 @@ PR (welcome later, not a deliverable).
 
 ### `~/Developer/open-opal/.tickets/`
 
-- T-001 — Build and run upstream Open Opal on mudmini — backlog (sprint 1)
+- T-001 — Build and run upstream Open Opal on mudmini — doing (sprint 1)
 - T-002 — Spike: on-camera 4K→1080p crop pipeline with a movable window — backlog (sprint 1; depends T-001)
 - T-003 — Follow mode: Vision face servo drives the crop window — backlog (sprint 2; depends T-002)
 - T-004 — Follow controls: toggle, framing presets, speed; persist settings — backlog (sprint 3; depends T-003)
