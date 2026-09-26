@@ -2,7 +2,7 @@
 id: T-011
 type: ticket
 title: App hangs forever when the camera link drops (watchdog → opal_close deadlock)
-status: todo
+status: doing
 priority: high
 tags: [bridge, depthai, reliability, virtual-camera]
 created: 2026-09-26
