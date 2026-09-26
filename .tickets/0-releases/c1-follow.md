@@ -54,7 +54,7 @@ PR (welcome later, not a deliverable).
 - T-007 — Harden the legacy-bootloader path (T-006 deferred review findings) — backlog (sprint 2; depends T-006)
 - T-008 — Easier way into the C1's bootloader window (no manual "Try again, then replug") — backlog (sprint 3; depends T-006)
 - T-009 — Upstream bridge CMakeLists names a missing test/region_test.c — backlog (sprint 2)
-- T-011 — App hangs forever when the camera link drops (watchdog → opal_close deadlock) — backlog (sprint 3; found in T-003)
+- T-011 — App hangs forever when the camera link drops (watchdog → opal_close deadlock) — doing (sprint 3; found in T-003)
 - T-002 — Crop bench: measure four on-camera crop pipelines against the follow-mode budget — done 2026-09-26 (sprint 1; design D picked)
 - T-003 — Follow plumbing: 1440p camera window + Mac zoom, view-rect API, focus mapping, hand-steered — blocked: paused by Chris 2026-09-26, code on branch t003-follow-wip (sprint 2; depends T-002)
 - T-010 — Follow servo: Vision faces steer the view rect, Center Stage feel — backlog (sprint 2; depends T-003; split from T-003)
