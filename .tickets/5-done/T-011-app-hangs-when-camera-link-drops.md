@@ -2,11 +2,12 @@
 id: T-011
 type: ticket
 title: App hangs forever when the camera link drops (watchdog → opal_close deadlock)
-status: doing
+status: done
 priority: high
 tags: [bridge, depthai, reliability, virtual-camera]
 created: 2026-09-26
 updated: 2026-09-26
+closed: 2026-09-26
 kind: bug
 depends_on: []
 release: c1-follow
@@ -116,6 +117,7 @@ echo T-011 verification OK
 - Evidence: T-003 Build log (the hang sample), `build/t011-run-1314.log` (stderr of the abort),
   `~/Library/Logs/DiagnosticReports/OpenOpal-2026-09-26-133752.ips`.
 
+- 2026-09-26 close: a dropped camera link no longer aborts or hangs the app; 4 unplug tests on camera 3 recovered; follow-ups T-012, T-013.
 ---
 
 ## Principles in scope
