@@ -68,7 +68,14 @@ final class CameraModel {
     /// make auto-exposure visibly pump.
     private var lastMeteredRect: CGRect?
 
+    /// Follow mode (T-003): the view rect and the Mac-side zoom. Used only while
+    /// the open pipeline is follow mode's whole-frame 2560x1440 (`device.followOpen`).
+    private(set) var follow: FollowPipeline?
+
     func start() async {
+        if follow == nil {
+            follow = FollowPipeline()
+        }
         if renderer == nil, let r = BokehRenderer() {
             if let mtl = MTLCreateSystemDefaultDevice() {
                 // The depth model is loaded lazily — it's 50MB and, in the default
@@ -101,23 +108,34 @@ final class CameraModel {
             Task.detached(priority: .userInitiated) {
                 defer { self.gate.exit() }
 
-                guard let work = await MainActor.run(body: { () -> (BokehRenderer, RenderSettings, Int)? in
+                guard let work = await MainActor.run(body: { () -> (BokehRenderer, RenderSettings, Int, FollowPipeline?)? in
                     guard let renderer = self.renderer else { return nil }
                     self.syncRenderer()
                     let seq = self.nextSequence
                     self.nextSequence += 1
-                    return (renderer, RenderSettings(self.settings), seq)
+                    return (renderer, RenderSettings(self.settings), seq,
+                            self.device.followOpen ? self.follow : nil)
                 }) else { return }
-                let (renderer, snapshot, seq) = work
+                let (renderer, snapshot, seq, followPipe) = work
+
+                // Follow mode: zoom the 1440p camera window to the 1080p view
+                // first, so everything below sees an ordinary 1080p frame.
+                let buffer: CVPixelBuffer
+                if let followPipe {
+                    guard let zoomed = followPipe.process(frame.buffer) else { return }
+                    buffer = zoomed
+                } else {
+                    buffer = frame.buffer
+                }
 
                 if snapshot.bokehEnabled && snapshot.syncBokeh {
                     // Analyse THIS frame and wait. Costs latency, buys a mask
                     // that lines up with the pixels we're about to blur.
-                    await renderer.analyzeNow(pixelBuffer: frame.buffer,
+                    await renderer.analyzeNow(pixelBuffer: buffer,
                                               needsDepth: !snapshot.uniformBlur)
                 }
 
-                let texture = TexBox(t: renderer.render(pixelBuffer: frame.buffer,
+                let texture = TexBox(t: renderer.render(pixelBuffer: buffer,
                                                         settings: snapshot))
 
                 // Feed the virtual camera the exact frame the preview shows —
@@ -146,6 +164,7 @@ final class CameraModel {
             }
         }
 
+        follow?.reset()
         await device.connect(settings: settings)
     }
 
@@ -155,6 +174,7 @@ final class CameraModel {
         isRebooting = true
         defer { isRebooting = false }
         device.disconnect()
+        follow?.reset()
         await device.connect(settings: settings)
     }
 
@@ -180,7 +200,14 @@ final class CameraModel {
     /// would immediately yank the exposure region back onto the person and the
     /// click would appear to do nothing.
     func focus(at sensorPoint: CGPoint) {
-        device.focus(at: sensorPoint)
+        // The point is in the picture the viewer sees; while following, that's a
+        // zoomed view, so map it back to the full frame and shrink the box with
+        // the zoom (CLAUDE.md: regions are sensor coordinates).
+        if device.followOpen, let view = follow?.currentView {
+            device.focus(at: FollowView.toFullFrame(sensorPoint, view: view), boxSize: 0.18 * view.w)
+        } else {
+            device.focus(at: sensorPoint)
+        }
         // The device drops into one-shot AF so the focus holds; reflect that in
         // the UI rather than leaving the picker lying about the mode.
         settings.afMode = .auto
@@ -199,10 +226,15 @@ final class CameraModel {
         // Meter on the upper-middle of the subject's box — that's where a face
         // lives. Metering the full body drags in a lot of torso and desk.
         let b = subject.bounds
-        let rect = CGRect(x: b.minX + b.width * 0.2,
+        var rect = CGRect(x: b.minX + b.width * 0.2,
                           y: b.minY,
                           width: b.width * 0.6,
                           height: max(b.height * 0.45, 0.05))
+        // Follow mode: the subject box is in the zoomed view; meter in the full
+        // frame (and dead-band there, so a moving view re-meters).
+        if device.followOpen, let view = follow?.currentView {
+            rect = FollowView.toFullFrame(rect, view: view)
+        }
 
         if let last = lastMeteredRect {
             // Dead-band: ignore small shifts, or AE hunts every time you breathe.
@@ -218,7 +250,33 @@ final class CameraModel {
     func applyColdChanges() async {
         isRebooting = true
         defer { isRebooting = false }
+        follow?.reset()
         await device.rebuildPipeline(settings: settings)
+    }
+
+    // MARK: - Follow mode (T-003)
+
+    /// Menu toggle: follow mode is a cold setting, so this rebuilds the pipeline.
+    func toggleFollow() {
+        settings.followEnabled.toggle()
+        Task { await applyColdChanges() }
+    }
+
+    // T-003 hand steering — replaced by T-010. Pan by a fraction of the view,
+    // zoom in 0.1x steps, keeping the centre.
+    func nudgeFollow(dx: CGFloat, dy: CGFloat) {
+        guard device.followOpen, let follow else { return }
+        var v = follow.currentView
+        v.x += dx * v.w
+        v.y += dy * v.w
+        follow.setView(v)
+    }
+
+    func zoomFollow(by step: CGFloat) {
+        guard device.followOpen, let follow else { return }
+        let v = follow.currentView
+        let w = 1 / (v.zoom + step)
+        follow.setView(FollowView.ViewRect(x: v.center.x - w / 2, y: v.center.y - w / 2, w: w))
     }
 }
 

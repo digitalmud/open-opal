@@ -56,6 +56,28 @@ What D does **not** give, and T-003 must design around:
 **C (WINDOW_1080)** is the fallback if host zoom proves costly: lowest latency (p50 50 ms), but
 pan only, at a fixed 2×.
 
+## Window-apply delay (T-003)
+
+Frames carry no crop metadata in depthai v2.30, so the app has to know **when** a window move
+takes effect in order to crop each frame against the window it was captured with. Measured
+2026-09-26 11:08 on camera 3, mode WINDOW_1440, with `./build/crop_bench --delay-probe`: 60 jumps
+between a left (x = 0) and a right (x = 1/3) window about 20 frames apart. Every frame was
+classified by column-luma profile against a 1 s reference at each position, and timed by capture
+time (arrival − latency).
+
+```
+reference similarity L-R: 0.858
+DELAY jumps=60 detected=60 first_new_ms min=1.3 median=16.9 max=35.2 last_old_ms_max=1.9 mixed=0 min_margin=0.132 frames=1208
+```
+
+- **A move applies from the next frame captured.** The last frame still showing the old window
+  was captured at most 1.9 ms after the send; the first frame showing the new one at least 1.3 ms
+  after. The 1.3–35 ms spread of "first new" is just where the next frame falls within the 33 ms
+  frame interval.
+- The old/new boundary sits inside a 0.6 ms band, far under one frame. No frame ever flipped back
+  (`mixed=0`), and every frame was classified with a clear margin (≥ 0.132).
+- **Rule the app uses:** a frame whose capture time is ≥ send time + 1.6 ms has the new window.
+
 ## Reproduce
 
 ```sh
@@ -66,4 +88,5 @@ clang -ISources/OpalBridge/include Sources/OpalBridge/test/crop_bench.c -L"$B" -
   -Wl,-rpath,"$B" -Wl,-rpath,"$PWD/vendor/install/lib" -o build/crop_bench
 ./build/crop_bench --modes 0,1,2,3,4 --secs 60          # ~11 min of camera time
 ./build/crop_bench --modes 1 --secs 60 --rate 10        # the supplementary run
+./build/crop_bench --delay-probe                        # window-apply delay (T-003), ~45 s
 ```

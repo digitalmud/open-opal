@@ -22,6 +22,11 @@ final class CameraSettings {
     /// why it's a cold setting.
     var rotate180 = true                  { didSet { if oldValue != rotate180 { coldDirty = true } } }
 
+    /// Follow mode (T-003): the camera sends the whole frame at 2560x1440 and the
+    /// Mac crops a 1.0-1.33x view out of it that can follow you. A different
+    /// device pipeline (ISP scale), hence cold. Output is always 1080p while on.
+    var followEnabled = false             { didSet { if oldValue != followEnabled { coldDirty = true } } }
+
     /// Preview only. A webcam preview should read like a mirror, but the image
     /// other people see must NOT be mirrored or your text comes out backwards —
     /// so this never touches the frames themselves.

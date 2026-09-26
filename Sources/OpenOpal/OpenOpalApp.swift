@@ -37,6 +37,31 @@ struct OpenOpalApp: App {
                     camera.previewFrozen.toggle()
                 }
                 .keyboardShortcut("f", modifiers: [.command, .shift])
+
+                Divider()
+
+                // Follow mode (T-003). A cold setting: toggling rebuilds the pipeline.
+                Button(camera.settings.followEnabled ? "Turn Follow Mode Off" : "Turn Follow Mode On") {
+                    camera.toggleFollow()
+                }
+                .keyboardShortcut("l", modifiers: [.command, .shift])
+
+                // T-003 hand steering — replaced by T-010.
+                Menu("Follow Test") {
+                    Button("Pan Left")  { camera.nudgeFollow(dx: -0.05, dy: 0) }
+                        .keyboardShortcut(.leftArrow, modifiers: [.command, .option])
+                    Button("Pan Right") { camera.nudgeFollow(dx: 0.05, dy: 0) }
+                        .keyboardShortcut(.rightArrow, modifiers: [.command, .option])
+                    Button("Pan Up")    { camera.nudgeFollow(dx: 0, dy: -0.05) }
+                        .keyboardShortcut(.upArrow, modifiers: [.command, .option])
+                    Button("Pan Down")  { camera.nudgeFollow(dx: 0, dy: 0.05) }
+                        .keyboardShortcut(.downArrow, modifiers: [.command, .option])
+                    Button("Zoom In")   { camera.zoomFollow(by: 0.1) }
+                        .keyboardShortcut("=", modifiers: [.command, .option])
+                    Button("Zoom Out")  { camera.zoomFollow(by: -0.1) }
+                        .keyboardShortcut("-", modifiers: [.command, .option])
+                }
+                .disabled(!camera.device.followOpen)
             }
         }
     }

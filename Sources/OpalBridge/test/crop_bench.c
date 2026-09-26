@@ -15,6 +15,12 @@
 // Run:
 //   ./crop_bench [--modes 0,1,2,3,4] [--secs 60] [--rate 30] [--mxid <serial>] [--out build/crop-bench]
 // --rate is how many times a second the moving run moves the window (default: every frame).
+//   ./crop_bench --modes 0 --isp 2/3   (mode NONE with a different ISP scale: the whole frame at 2560x1440)
+//   ./crop_bench --delay-probe
+// measures how long the camera takes to apply a window move (mode WINDOW_1440): it jumps the
+// window between a left and a right position 60 times and times, by each frame's capture time
+// (arrival minus latency), when the new position first shows up. Frames carry no crop metadata
+// in depthai v2.30, so the app matches frames to windows with this delay (T-003).
 
 #include "OpalBridge.h"
 
@@ -43,11 +49,19 @@ static atomic_int  g_snapReady;
 static unsigned char g_thumb[THUMB_W * THUMB_W];  // big enough for 16:9 at 320 wide
 static int         g_thumbH;
 
+// --- delay probe: a column-luma profile + capture time per frame ------------
+#define PROF_N 64
+#define MAX_REC 4096
+static atomic_int  g_recOn;
+static atomic_int  g_nrec;
+static double      g_recT[MAX_REC];               // capture time, bench clock (s)
+static float       g_recP[MAX_REC][PROF_N];       // normalised column profile
+
 // Ctrl-C / SIGTERM: finish the current step, close the camera, then exit.
 static volatile sig_atomic_t g_stop;
 static void onSignal(int sig) { (void)sig; g_stop = 1; }
 
-static double now(void) {
+static double now(void) {  // (declared above for the callback)
     struct timespec t;
     clock_gettime(CLOCK_MONOTONIC, &t);
     return t.tv_sec + t.tv_nsec / 1e9;
@@ -59,9 +73,38 @@ static void onLog(const char* line, void* ctx) {
     fflush(stdout);
 }
 
+static double now(void);
+
+// Column profile: mean luma of PROF_N vertical bands (rows sampled every 8th),
+// then zero-mean / unit-norm so exposure drift doesn't matter.
+static void profileOf(const uint8_t* y, size_t yStride, int w, int h, float* out) {
+    double mean = 0;
+    for(int b = 0; b < PROF_N; b++) {
+        int c0 = b * w / PROF_N, c1 = (b + 1) * w / PROF_N;
+        double sum = 0; long n = 0;
+        for(int r = 0; r < h; r += 8)
+            for(int c = c0; c < c1; c += 4) { sum += y[(size_t)r * yStride + (size_t)c]; n++; }
+        out[b] = (float)(sum / (n ? n : 1));
+        mean += out[b];
+    }
+    mean /= PROF_N;
+    double norm = 0;
+    for(int b = 0; b < PROF_N; b++) { out[b] -= (float)mean; norm += (double)out[b] * out[b]; }
+    norm = sqrt(norm) + 1e-9;
+    for(int b = 0; b < PROF_N; b++) out[b] = (float)(out[b] / norm);
+}
+
 static void onFrame(const uint8_t* y, size_t yStride, const uint8_t* uv, size_t uvStride,
                     int w, int h, int64_t t, double latencyMs, void* ctx) {
     (void)uv; (void)uvStride; (void)t; (void)ctx;
+    if(atomic_load(&g_recOn)) {
+        int k = atomic_load(&g_nrec);
+        if(k < MAX_REC) {
+            g_recT[k] = now() - latencyMs / 1000.0;
+            profileOf(y, yStride, w, h, g_recP[k]);
+            atomic_store(&g_nrec, k + 1);
+        }
+    }
     atomic_fetch_add(&g_frames, 1);
     int i = atomic_fetch_add(&g_nsamples, 1);
     if(i < MAX_SAMPLES) g_lat[i] = latencyMs;
@@ -150,11 +193,100 @@ static int waitUsable(const char* want, char* mxidOut, double timeout) {
     return 0;
 }
 
+static float corr(const float* a, const float* b) {
+    double s = 0;
+    for(int i = 0; i < PROF_N; i++) s += (double)a[i] * b[i];
+    return (float)s;
+}
+
+static int cmpD(const void* a, const void* b) {
+    double x = *(const double*)a, y = *(const double*)b;
+    return (x > y) - (x < y);
+}
+
+// Mean of the recorded profiles [from, to), normalised: a reference for one position.
+static void refFrom(int from, int to, float* out) {
+    for(int b = 0; b < PROF_N; b++) out[b] = 0;
+    for(int k = from; k < to; k++) for(int b = 0; b < PROF_N; b++) out[b] += g_recP[k][b];
+    double norm = 0;
+    for(int b = 0; b < PROF_N; b++) norm += (double)out[b] * out[b];
+    norm = sqrt(norm) + 1e-9;
+    for(int b = 0; b < PROF_N; b++) out[b] = (float)(out[b] / norm);
+}
+
+static int delayProbe(const char* wantMxid) {
+    char mxid[OPAL_MXID_LEN];
+    if(!waitUsable(wantMxid, mxid, 60)) { printf("DELAY error=\"no usable camera\"\n"); return 1; }
+    OpalPipelineConfig cfg = {.ispNum = 1, .ispDen = 2, .fps = 30, .keep4K = false,
+                              .orientation = OPAL_ORIENT_ROTATE_180, .cropMode = OPAL_CROP_WINDOW_1440};
+    OpalDeviceHandle* h = opal_open(mxid, cfg, onFrame, NULL);
+    if(!h) { printf("DELAY error=\"%s\"\n", opal_last_error()); return 1; }
+    const float L = 0.f, R = 1.f / 3.f, Y = 1.f / 6.f, W = 2.f / 3.f;  // window positions
+    for(int i = 0; i < 50 && !g_stop; i++) usleep(100000);             // drain
+
+    // References: 1 s parked at each position.
+    float refL[PROF_N], refR[PROF_N];
+    atomic_store(&g_nrec, 0);
+    opal_set_crop(h, L, Y, W, W); usleep(800000);
+    int a0 = atomic_load(&g_nrec); atomic_store(&g_recOn, 1); usleep(1000000); atomic_store(&g_recOn, 0);
+    refFrom(a0, atomic_load(&g_nrec), refL);
+    opal_set_crop(h, R, Y, W, W); usleep(800000);
+    int b0 = atomic_load(&g_nrec); atomic_store(&g_recOn, 1); usleep(1000000); atomic_store(&g_recOn, 0);
+    refFrom(b0, atomic_load(&g_nrec), refR);
+    printf("  reference similarity L-R: %.3f (lower = easier to tell apart)\n", corr(refL, refR));
+
+    // 60 jumps, ~20 frames apart, alternating R->L->R..., recording every frame.
+    enum { JUMPS = 60 };
+    double sendT[JUMPS]; int target[JUMPS];
+    int base = atomic_load(&g_nrec);
+    atomic_store(&g_recOn, 1);
+    for(int j = 0; j < JUMPS && !g_stop; j++) {
+        target[j] = (j % 2 == 0) ? 0 : 1;   // 0 = L, 1 = R (we start parked at R)
+        sendT[j] = now();
+        opal_set_crop(h, target[j] ? R : L, Y, W, W);
+        usleep(667000);
+    }
+    atomic_store(&g_recOn, 0);
+    int end = atomic_load(&g_nrec);
+    opal_close(h);
+
+    // Classify every recorded frame; per jump, time the first frame at the new position.
+    double delays[JUMPS], lastOld[JUMPS]; int nd = 0, mixed = 0; double minMargin = 1e9;
+    for(int j = 0; j < JUMPS; j++) {
+        double t0 = sendT[j], t1 = (j + 1 < JUMPS) ? sendT[j + 1] : 1e18;
+        double first = -1, lastOldT = t0; int flippedBack = 0;
+        for(int k = base; k < end; k++) {
+            if(g_recT[k] < t0 - 0.2 || g_recT[k] >= t1) continue;
+            float cl = corr(g_recP[k], refL), cr = corr(g_recP[k], refR);
+            int cls = cr > cl ? 1 : 0;
+            double m = fabs((double)cl - cr);
+            if(m < minMargin) minMargin = m;
+            if(cls == target[j]) { if(first < 0 && g_recT[k] >= t0 - 0.2) first = g_recT[k]; }
+            else if(first >= 0) flippedBack = 1;
+            else lastOldT = g_recT[k];
+        }
+        if(first >= 0) { delays[nd] = (first - t0) * 1000; lastOld[nd] = (lastOldT - t0) * 1000; nd++; }
+        mixed += flippedBack;
+    }
+    if(nd == 0) { printf("DELAY error=\"no jump detected\"\n"); return 1; }
+    double sorted[JUMPS]; memcpy(sorted, delays, sizeof(double) * (size_t)nd);
+    qsort(sorted, (size_t)nd, sizeof(double), cmpD);
+    double maxOld = -1e9;
+    for(int i = 0; i < nd; i++) if(lastOld[i] > maxOld) maxOld = lastOld[i];
+    printf("DELAY jumps=%d detected=%d first_new_ms min=%.1f median=%.1f max=%.1f "
+           "last_old_ms_max=%.1f mixed=%d min_margin=%.3f frames=%d\n",
+           JUMPS, nd, sorted[0], sorted[nd / 2], sorted[nd - 1], maxOld, mixed, minMargin, end - base);
+    fflush(stdout);
+    return 0;
+}
+
 int main(int argc, char** argv) {
     int modes[8] = {0, 1, 2, 3, 4}, nmodes = 5;
     double secs = 60, rate = 30;
     const char* wantMxid = "";
     const char* outDir = "build/crop-bench";
+    int probe = 0;
+    int ispNum = 1, ispDen = 2;   // mode NONE's ISP scale; --isp 2/3 sends the whole frame at 2560x1440
     for(int i = 1; i < argc; i++) {
         if(!strcmp(argv[i], "--modes") && i + 1 < argc) {
             nmodes = 0;
@@ -167,6 +299,10 @@ int main(int argc, char** argv) {
             if(rate <= 0) rate = 30;
         } else if(!strcmp(argv[i], "--mxid") && i + 1 < argc) {
             wantMxid = argv[++i];
+        } else if(!strcmp(argv[i], "--isp") && i + 1 < argc) {
+            if(sscanf(argv[++i], "%d/%d", &ispNum, &ispDen) != 2 || ispNum <= 0 || ispDen <= 0) { ispNum = 1; ispDen = 2; }
+        } else if(!strcmp(argv[i], "--delay-probe")) {
+            probe = 1;
         } else if(!strcmp(argv[i], "--out") && i + 1 < argc) {
             outDir = argv[++i];
         }
@@ -176,6 +312,7 @@ int main(int argc, char** argv) {
     opal_set_boot_logger(onLog, NULL);
     signal(SIGINT, onSignal);
     signal(SIGTERM, onSignal);
+    if(probe) return delayProbe(wantMxid);
 
     for(int m = 0; m < nmodes && !g_stop; m++) {
         int mode = modes[m];
@@ -189,7 +326,7 @@ int main(int argc, char** argv) {
         printf("\n=== mode %s on %s\n", name, mxid);
         fflush(stdout);
 
-        OpalPipelineConfig cfg = {.ispNum = 1, .ispDen = 2, .fps = 30, .keep4K = false,
+        OpalPipelineConfig cfg = {.ispNum = ispNum, .ispDen = ispDen, .fps = 30, .keep4K = false,
                                   .orientation = OPAL_ORIENT_ROTATE_180,
                                   .cropMode = (OpalCropMode)mode};
         double t0 = now();

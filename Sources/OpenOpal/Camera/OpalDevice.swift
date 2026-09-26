@@ -66,6 +66,10 @@ final class OpalDevice {
 
     private let bootSink = BootLogSink()
     private var handle: OpaquePointer?
+
+    /// Whether the open pipeline is follow mode's (not the setting, which may be
+    /// waiting for a rebuild).
+    private(set) var followOpen = false
     private var telemetryTimer: Timer?
 
     init() {
@@ -144,6 +148,14 @@ final class OpalDevice {
         }
         cfg.fps = Int32(settings.fps)
         cfg.orientation = settings.rotate180 ? OPAL_ORIENT_ROTATE_180 : OPAL_ORIENT_NORMAL
+        // Follow mode (T-003, design E1): the whole frame at 2560x1440 (ISP 2/3);
+        // the Mac crops and follows inside it (FollowPipeline). outputMode doesn't
+        // apply while following.
+        if settings.followEnabled {
+            cfg.ispNum = 2
+            cfg.ispDen = 3
+            cfg.keep4K = false
+        }
 
         // opal_open boots the Myriad and blocks for a couple of seconds, so keep
         // it off the main actor or the whole UI stalls mid-connect.
@@ -179,6 +191,7 @@ final class OpalDevice {
         }
 
         handle = opened
+        followOpen = settings.followEnabled
         readInfo()
         state = .streaming
         apply(settings)
@@ -190,6 +203,7 @@ final class OpalDevice {
         telemetryTimer?.invalidate()
         telemetryTimer = nil
         if let handle {
+            followOpen = false
             // Blocking: joins the capture thread and resets the Myriad.
             opal_close(handle)
             self.handle = nil
@@ -345,7 +359,15 @@ final class OpalDevice {
                               lensPosition: Int(t.reportedLensPosition),
                               colorTempK: Int(t.reportedColorTempK))
         if resolution.w == 0 { readInfo() }
+
+        // A plain log line every ~4 s (10 polls), so measurements can be pasted from the
+        // log instead of read off the toolbar (CLAUDE.md "Measure, don't assert").
+        telemetryPolls += 1
+        if telemetryPolls % 10 == 0 {
+            log.info("telemetry \(t.fps, format: .fixed(precision: 1)) fps · p50 latency \(t.latencyMsP50, format: .fixed(precision: 1)) ms\(self.followOpen ? " · follow" : "", privacy: .public)")
+        }
     }
+    private var telemetryPolls = 0
 }
 
 /// Receives frames on depthai's capture thread and turns them into Metal-ready
