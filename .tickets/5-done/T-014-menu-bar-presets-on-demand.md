@@ -2,11 +2,12 @@
 id: T-014
 type: ticket
 title: Menu-bar app — follow settings, camera on demand for calls, no preview, status icon
-status: backlog
+status: cancelled
 priority: high
 tags: [ux, menu-bar, presets, virtual-camera, reliability]
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-09-28
+closed: 2026-09-28
 kind: feature
 depends_on: [T-005, T-010]
 release: c1-follow
@@ -14,6 +15,9 @@ sprint: 6
 ---
 
 ## Description
+
+> **Moved 2026-09-28 to Stagehand T-003** (`~/Developer/stagehand`, github.com/digitalmud/stagehand).
+> Chris split the follow feature into its own app; this ticket is closed here.
 
 **2026-09-26 re-plan (Chris approved):** the app now runs on the **stock webcam** (T-010), so
 there are **no manual camera presets** (the exposure model below applied to the depthai path and is

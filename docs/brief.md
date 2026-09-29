@@ -1,7 +1,7 @@
 # open-opal — follow mode for the Opal C1
 
 **Area:** Personal / System
-**Status:** 2026-09-26 re-plan (Chris approved): follow now runs on the **stock webcam feed** (prototype `Prototypes/StockFollow/`, settings locked by Chris, 8 % CPU / 42 MB) → a signed "Open Opal Camera" (T-005, waiting on Chris's Apple membership) → a menu-bar app (T-014). The depthai takeover path (T-001/T-006/T-002/T-011 done) is parked as the advanced path. Release `c1-follow`, sprints 4–6.
+**Status:** 2026-09-28 **parked** (Chris). The follow feature moved to its own app, **Stagehand** (`~/Developer/stagehand`, github.com/digitalmud/stagehand), which ships its own signed camera; Stagehand's Apple signing setup is done. Here: the depthai takeover path (T-001/T-006/T-002/T-011 done) and T-005 (this app's virtual camera, branch `t005-virtual-camera`) stay parked.
 
 ## Overview
 

@@ -2,11 +2,12 @@
 id: T-015
 type: ticket
 title: Glass-to-glass latency of the stock C1 webcam feed (1440p) vs the depthai path
-status: backlog
+status: cancelled
 priority: high
 tags: [measurement, latency, uvc]
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-09-28
+closed: 2026-09-28
 kind: chore
 depends_on: []
 release: c1-follow
@@ -14,6 +15,9 @@ sprint: 4
 ---
 
 ## Description
+
+> **Moved 2026-09-28 to Stagehand T-004** (`~/Developer/stagehand`, github.com/digitalmud/stagehand).
+> Chris split the follow feature into its own app; this ticket is closed here.
 
 Stub from the 2026-09-26 re-plan; `/scope` fleshes it out. Follow now runs on camera 3's **stock
 webcam feed** (2560×1440 @ 29.9 fps, measured). Frames reach the app ~2 ms after their USB

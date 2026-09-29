@@ -120,3 +120,10 @@
   and smoother." So we build the standalone app.
 - Apple setup: the certificate and notarytool credentials don't depend on the name; the App
   Group, App IDs and profiles wait for the name. No signing identity on this Mac yet (0 found).
+- 21:20: Chris named it **Stagehand**, new repo (`~/Developer/stagehand`, private
+  github.com/digitalmud/stagehand). He did the Apple setup with Stagehand's IDs: Developer ID
+  certificate (valid), App Group `group.ca.digitalmud.stagehand`, App IDs `ca.digitalmud.stagehand`
+  (+ System Extension) and `.camera`, two Developer ID profiles (checked: system-extension.install
+  and the group are granted), notary profile `stagehand` (checked with `notarytool history`).
+  open-opal is **parked**: T-010/T-014/T-015 moved to Stagehand (T-002/T-003/T-004), T-005 back to
+  backlog, release `c1-follow` parked. Next: `/scope` Stagehand T-001 (signed virtual camera).

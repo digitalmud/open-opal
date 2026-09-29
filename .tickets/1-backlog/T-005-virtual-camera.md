@@ -2,18 +2,23 @@
 id: T-005
 type: ticket
 title: Virtual camera working — adopt upstream PR #1, our identity, Developer ID sign + notarize, /Applications
-status: todo
+status: backlog
 priority: high
 tags: [signing, notarization, virtual-camera, release]
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-09-28
 depends_on: [T-001]
 kind: feature
 release: c1-follow
-sprint: 4
+sprint: parked
 ---
 
 ## Description
+
+> **Parked 2026-09-28.** Chris moved the follow feature to its own app, Stagehand, which ships its
+> own signed camera (Stagehand T-001). This ticket stays for the depthai app's own virtual camera;
+> its work is on branch `t005-virtual-camera`. The Apple setup below used open-opal IDs that were
+> never registered; Stagehand's IDs were registered instead.
 
 Chris, 2026-09-26 12:49: "let's pause on the follow and get the virtual camera working 100%."
 Upstream publishes a CoreMediaIO camera extension, "Open Opal Camera", that Zoom, Meet and FaceTime

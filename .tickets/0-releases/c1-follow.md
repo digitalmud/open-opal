@@ -2,11 +2,11 @@
 type: release
 slug: c1-follow
 title: Center Stage for the Opal C1 — follow on the stock webcam, as a signed virtual camera
-status: active
+status: parked
 created: 2026-09-26
 target: 2026-10
 dashboard:
-  health: on-track
+  health: parked
   summary: Keep the Opal C1 as Chris's daily camera and add Center Stage-style follow: the stock webcam feed, framed on him by a small menu-bar app, published as a signed virtual camera.
   deliverables:
     - { label: "Upstream builds and streams on mudmini", status: done }
@@ -68,10 +68,10 @@ framing; Windows/Linux; an upstream PR (welcome later).
 - T-011 — App hangs forever when the camera link drops (watchdog → opal_close deadlock) — done 2026-09-26 (sprint 3)
 - T-003 — Follow plumbing on the depthai path (design E1) — cancelled 2026-09-26: superseded by T-010; code on branch t003-follow-wip
 - T-004 — Follow controls: toggle, framing presets, speed; persist settings — cancelled 2026-09-26: superseded by T-014
-- T-005 — Virtual camera working: adopt upstream PR #1, our identity, Developer ID sign + notarize, /Applications — todo, work on branch t005-virtual-camera (sprint 4; waits on Apple membership)
-- T-015 — Glass-to-glass latency of the stock C1 webcam feed (1440p) vs the depthai path — backlog (sprint 4)
-- T-010 — Follow on the stock webcam: Vision faces steer a smooth 1440p crop into the virtual camera — backlog (sprint 5; depends T-005)
-- T-014 — Menu-bar app: follow settings, camera on demand for calls, no preview, status icon — backlog (sprint 6; depends T-005, T-010)
+- T-005 — Virtual camera working: adopt upstream PR #1, our identity, Developer ID sign + notarize, /Applications — backlog, parked 2026-09-28 (branch t005-virtual-camera)
+- T-015 — Glass-to-glass latency of the stock C1 webcam feed — moved 2026-09-28 to Stagehand T-004
+- T-010 — Follow on the stock webcam — moved 2026-09-28 to Stagehand T-002
+- T-014 — Menu-bar app — moved 2026-09-28 to Stagehand T-003
 - T-007 — Harden the legacy-bootloader path (T-006 deferred review findings) — backlog (deferred: depthai path)
 - T-008 — Easier way into the C1's bootloader window — backlog (deferred: depthai path)
 - T-009 — Upstream bridge CMakeLists names a missing test/region_test.c — backlog (deferred: depthai path)
@@ -93,3 +93,4 @@ framing; Windows/Linux; an upstream PR (welcome later).
 - 2026-09-26 — T-011 done: a dropped camera link no longer hangs or aborts the app (safe close, no crash-dump hunt, timed control sends). T-012, T-013 filed.
 - 2026-09-26 — T-014 filed from a design conversation with Chris (menu bar, presets, on-demand camera, no blur, no face metering); measured usage baseline recorded on it.
 - 2026-09-26 — **Re-planned (Chris approved):** follow moves to the stock webcam feed (prototype proven, settings locked); the depthai path is parked. T-003/T-004 cancelled as superseded; T-010/T-014 retargeted; T-015 added; T-007/8/9/12/13 deferred; new sprints 4–6.
+- 2026-09-28 — **Parked (Chris):** the follow feature is now its own app, Stagehand (`~/Developer/stagehand`, release `stagehand-1`). T-010/T-014/T-015 moved there; T-005 parked. Camo's auto framing was tried and lost to the prototype.

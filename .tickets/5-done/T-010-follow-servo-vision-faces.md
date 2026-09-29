@@ -2,11 +2,12 @@
 id: T-010
 type: ticket
 title: Follow on the stock webcam — Vision faces steer a smooth 1440p crop into the virtual camera
-status: backlog
+status: cancelled
 priority: high
 tags: [follow, vision, servo, swift]
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-09-28
+closed: 2026-09-28
 kind: feature
 depends_on: [T-005]
 release: c1-follow
@@ -14,6 +15,9 @@ sprint: 5
 ---
 
 ## Description
+
+> **Moved 2026-09-28 to Stagehand T-002** (`~/Developer/stagehand`, github.com/digitalmud/stagehand).
+> Chris split the follow feature into its own app; this ticket is closed here.
 
 **2026-09-26 re-plan (Chris approved):** retargeted from the depthai path to the **stock webcam
 feed**. The reference is `Prototypes/StockFollow/` (tuned live and locked by Chris; 8 % CPU,
