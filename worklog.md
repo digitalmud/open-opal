@@ -105,3 +105,18 @@
   superseded; depthai-path fixes (T-007/8/9/12/13) deferred. Next action: when Chris's Apple
   membership is active, do his six Apple steps (`docs/INSTALL.md` on branch `t005-virtual-camera`),
   then merge master (T-011) into that branch and run `scripts/release.sh`.
+
+## 2026-09-28 — Chris wants the follow as its own app; Camo tried and loses
+
+- 20:50: Chris asked to separate the apps: "I'm really just interested in the centre stage
+  feature at this point… maybe with a fun name?" The follow never needed the depthai takeover
+  (the prototype reads the C1 as a plain webcam), so it can be a standalone menu-bar app with its
+  own virtual camera, in a new repo (upstream has no licence file, so its extension code isn't
+  copied; start from Xcode's camera-extension template). Still needs Developer ID + notarization.
+  Name candidates offered: Stagehand (my pick), Dolly, Sidekick, Swivel.
+- Existing apps checked: Camo Studio (auto framing + auto zoom, signed; Chris has a lifetime
+  licence, Camo 2.9.0 installed) and Reframe (open source, same Vision approach, published build
+  not Developer ID-signed). 21:02: Chris tried Camo on the C1: "the prototype seems to be better
+  and smoother." So we build the standalone app.
+- Apple setup: the certificate and notarytool credentials don't depend on the name; the App
+  Group, App IDs and profiles wait for the name. No signing identity on this Mac yet (0 found).
