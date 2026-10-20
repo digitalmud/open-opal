@@ -2,7 +2,7 @@
 type: release
 slug: c1-follow
 title: Center Stage for the Opal C1 — follow on the stock webcam, as a signed virtual camera
-status: parked
+status: active
 created: 2026-09-26
 target: 2026-10
 dashboard:
@@ -68,7 +68,7 @@ framing; Windows/Linux; an upstream PR (welcome later).
 - T-011 — App hangs forever when the camera link drops (watchdog → opal_close deadlock) — done 2026-09-26 (sprint 3)
 - T-003 — Follow plumbing on the depthai path (design E1) — cancelled 2026-09-26: superseded by T-010; code on branch t003-follow-wip
 - T-004 — Follow controls: toggle, framing presets, speed; persist settings — cancelled 2026-09-26: superseded by T-014
-- T-005 — Virtual camera working: adopt upstream PR #1, our identity, Developer ID sign + notarize, /Applications — backlog, parked 2026-09-28 (branch t005-virtual-camera)
+- T-005 — Virtual camera working: adopt upstream PR #1, our identity, Developer ID sign + notarize, /Applications — backlog (sprint deferred; parked 2026-09-28, branch t005-virtual-camera)
 - T-015 — Glass-to-glass latency of the stock C1 webcam feed — moved 2026-09-28 to Stagehand T-004
 - T-010 — Follow on the stock webcam — moved 2026-09-28 to Stagehand T-002
 - T-014 — Menu-bar app — moved 2026-09-28 to Stagehand T-003
@@ -94,3 +94,4 @@ framing; Windows/Linux; an upstream PR (welcome later).
 - 2026-09-26 — T-014 filed from a design conversation with Chris (menu bar, presets, on-demand camera, no blur, no face metering); measured usage baseline recorded on it.
 - 2026-09-26 — **Re-planned (Chris approved):** follow moves to the stock webcam feed (prototype proven, settings locked); the depthai path is parked. T-003/T-004 cancelled as superseded; T-010/T-014 retargeted; T-015 added; T-007/8/9/12/13 deferred; new sprints 4–6.
 - 2026-09-28 — **Parked (Chris):** the follow feature is now its own app, Stagehand (`~/Developer/stagehand`, release `stagehand-1`). T-010/T-014/T-015 moved there; T-005 parked. Camo's auto framing was tried and lost to the prototype.
+- 2026-10-20 — `status: parked` → `active` with `dashboard.health: parked` (schema vocab has no parked; the release is neither shipped nor abandoned while T-005 waits on the Apple Developer membership). T-005 `sprint: parked` → `deferred`, the schema's parking lot. Board repair, Code/T-815.

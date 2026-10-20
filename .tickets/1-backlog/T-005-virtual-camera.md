@@ -6,11 +6,11 @@ status: backlog
 priority: high
 tags: [signing, notarization, virtual-camera, release]
 created: 2026-09-26
-updated: 2026-09-28
+updated: 2026-10-20
 depends_on: [T-001]
 kind: feature
 release: c1-follow
-sprint: parked
+sprint: deferred
 ---
 
 ## Description
