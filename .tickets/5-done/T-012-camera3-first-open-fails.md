@@ -2,15 +2,16 @@
 id: T-012
 type: ticket
 title: First open of an f63d C1 (bootloader 0.0.15) fails once with '__bootloader' and succeeds on retry (+~5 s)
-status: backlog
+status: cancelled
 priority: low
 tags: [bridge, depthai, startup]
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-11-19
 kind: bug
 depends_on: []
 release: c1-follow
 sprint: deferred
+closed: 2026-11-19
 ---
 
 ## Description
@@ -23,3 +24,7 @@ later succeeds (app log, 13:58:00 and 13:59:22/50). depthai warns "Flashed bootl
 open costs ~5 s. Find out why depthai's first BOOTLOADER-path attempt fails (a timing race with
 the camera's own re-enumeration?) and whether a short wait or a different retry cadence fixes it
 without flashing (the bootloader upgrade depthai suggests stays forbidden).
+
+## Groomed out, 2026-11-19
+
+Closed as no longer relevant. It belongs to the camera-follow release, parked in September and since overtaken by another tool, one of eight paused things put to Chris as "which are alive?". He named the two that are (2026-11-19 12:55: "these are still live: The monthly Knox Radar; A sensor for the dryer") and this was not one of them. Nothing was deleted: to bring it back, move this file to `1-backlog/` and set `status: backlog`.

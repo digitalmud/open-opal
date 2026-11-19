@@ -2,15 +2,16 @@
 id: T-005
 type: ticket
 title: Virtual camera working — adopt upstream PR #1, our identity, Developer ID sign + notarize, /Applications
-status: backlog
+status: cancelled
 priority: high
 tags: [signing, notarization, virtual-camera, release]
 created: 2026-09-26
-updated: 2026-10-20
+updated: 2026-11-19
 depends_on: [T-001]
 kind: feature
 release: c1-follow
 sprint: deferred
+closed: 2026-11-19
 ---
 
 ## Description
@@ -200,3 +201,7 @@ PR #1's persistence).
 ## Review
 
 _Review stage fills this in._
+
+## Groomed out, 2026-11-19
+
+Closed as no longer relevant. It belongs to the camera-follow release, parked in September and since overtaken by another tool, one of eight paused things put to Chris as "which are alive?". He named the two that are (2026-11-19 12:55: "these are still live: The monthly Knox Radar; A sensor for the dryer") and this was not one of them. Nothing was deleted: to bring it back, move this file to `1-backlog/` and set `status: backlog`.

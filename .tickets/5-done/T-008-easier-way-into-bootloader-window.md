@@ -2,15 +2,16 @@
 id: T-008
 type: ticket
 title: Easier way into the C1's bootloader window (no manual "Try again, then replug")
-status: backlog
+status: cancelled
 priority: low
 tags: [ux, bridge, discovery]
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-11-19
 depends_on: [T-006]
 kind: feature
 release: c1-follow
 sprint: deferred
+closed: 2026-11-19
 ---
 
 ## Description
@@ -27,3 +28,7 @@ after 20 s. Options to explore:
 
 Also fix the boot-log label: state 2 reads "booted (depthai firmware, RAM)", but on this camera
 it's the stock webcam firmware (`OpalBridge.cpp` `stateName`).
+
+## Groomed out, 2026-11-19
+
+Closed as no longer relevant. It belongs to the camera-follow release, parked in September and since overtaken by another tool, one of eight paused things put to Chris as "which are alive?". He named the two that are (2026-11-19 12:55: "these are still live: The monthly Knox Radar; A sensor for the dryer") and this was not one of them. Nothing was deleted: to bring it back, move this file to `1-backlog/` and set `status: backlog`.

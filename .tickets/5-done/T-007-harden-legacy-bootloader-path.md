@@ -2,15 +2,16 @@
 id: T-007
 type: ticket
 title: Harden the legacy-bootloader path (T-006 deferred review findings)
-status: backlog
+status: cancelled
 priority: medium
 tags: [bridge, bootloader, robustness]
 created: 2026-09-26
-updated: 2026-09-26
+updated: 2026-11-19
 depends_on: [T-006]
 kind: bug
 release: c1-follow
 sprint: deferred
+closed: 2026-11-19
 ---
 
 ## Description
@@ -33,3 +34,7 @@ its reviews deferred these, each with the evidence on T-006:
 
 Keep the T-006 rules: only `GetBootloaderVersion` and `UsbRomBoot` are ever sent; upstream
 cameras never reach the new code.
+
+## Groomed out, 2026-11-19
+
+Closed as no longer relevant. It belongs to the camera-follow release, parked in September and since overtaken by another tool, one of eight paused things put to Chris as "which are alive?". He named the two that are (2026-11-19 12:55: "these are still live: The monthly Knox Radar; A sensor for the dryer") and this was not one of them. Nothing was deleted: to bring it back, move this file to `1-backlog/` and set `status: backlog`.
