@@ -127,3 +127,11 @@
   and the group are granted), notary profile `stagehand` (checked with `notarytool history`).
   open-opal is **parked**: T-010/T-014/T-015 moved to Stagehand (T-002/T-003/T-004), T-005 back to
   backlog, release `c1-follow` parked. Next: `/scope` Stagehand T-001 (signed virtual camera).
+
+## 2026-11-21 — the release workflow is switched off while the project is parked
+
+- The tag-triggered `Release` workflow (`.github/workflows/release.yml`: build, sign, notarize, publish a DMG on any
+  `v*` tag) was disabled in the repository's Actions settings at 12:52 by Code's desk, on Chris's yes. The file is
+  unchanged and nothing was deleted; GitHub now reports the workflow as `disabled_manually`, so pushing a tag starts
+  nothing.
+- To put it back: `gh workflow enable Release -R digitalmud/open-opal` (or Actions ▸ Release ▸ Enable workflow).
